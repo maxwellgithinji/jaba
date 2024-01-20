@@ -69,6 +69,22 @@ let addTwo = fn(x) { return x + 2; };
 twice(addTwo, 2); // => 6
 ```
 
+### Closures
+```
+// newGreeter returns a new function, that greets a `name` with the given
+// `greeting`.
+let newGreeter = fn(greeting) {
+  // `puts` is a built-in function we add to the interpreter
+  return fn(name) { puts(greeting + " " + name); }
+};
+
+// `hello` is a greeter function that says "Hello"
+let hello = newGreeter("Hello");
+
+// Calling it outputs the greeting:
+hello("dear, future Reader!"); // => Hello dear, future Reader!
+```
+
 ## References 
 ### [ Writing An Interpreter In Go](https://interpreterbook.com/)
 - Ball, Thorsten. Writing An Interpreter In Go (p. 8). Kindle Edition.

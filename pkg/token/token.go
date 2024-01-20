@@ -1,3 +1,5 @@
+// Package token is used to represent original source code.
+// it includes the token type and the token value
 package token
 
 /*

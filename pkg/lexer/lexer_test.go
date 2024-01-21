@@ -39,15 +39,14 @@ func TestNextTokenOperatorsDelimitersKeywords(t *testing.T) {
 }
 
 func TestNextTokenJabaProgram(t *testing.T) {
-	input := `
-    let x = 1;
-    let y = 3;
+	input := `let foo = 1;
+    let bar = 3;
 
-    let add = fn (x, y) {
-        x + y;
+    let add = fn (foo, bar) {
+        foo + bar;
     };
 
-    let result = add(x, y);
+    let result = add(foo, bar);
     `
 
 	tests := []struct {
@@ -55,13 +54,13 @@ func TestNextTokenJabaProgram(t *testing.T) {
 		expectedLiteral string
 	}{
 		{token.LET, "let"},
-		{token.IDENTIFIER, "x"},
+		{token.IDENTIFIER, "foo"},
 		{token.ASSIGN, "="},
 		{token.INTEGER, "1"},
 		{token.SEMICOLON, ";"},
 
 		{token.LET, "let"},
-		{token.IDENTIFIER, "y"},
+		{token.IDENTIFIER, "bar"},
 		{token.ASSIGN, "="},
 		{token.INTEGER, "3"},
 		{token.SEMICOLON, ";"},
@@ -71,14 +70,14 @@ func TestNextTokenJabaProgram(t *testing.T) {
 		{token.ASSIGN, "="},
 		{token.FUNCTION, "fn"},
 		{token.LPAREN, "("},
-		{token.IDENTIFIER, "x"},
+		{token.IDENTIFIER, "foo"},
 		{token.COMMA, ","},
-		{token.IDENTIFIER, "y"},
+		{token.IDENTIFIER, "bar"},
 		{token.RPAREN, ")"},
 		{token.LBRACE, "{"},
-		{token.IDENTIFIER, "x"},
+		{token.IDENTIFIER, "foo"},
 		{token.PLUS, "+"},
-		{token.IDENTIFIER, "y"},
+		{token.IDENTIFIER, "bar"},
 		{token.SEMICOLON, ";"},
 		{token.RBRACE, "}"},
 		{token.SEMICOLON, ";"},
@@ -88,9 +87,9 @@ func TestNextTokenJabaProgram(t *testing.T) {
 		{token.ASSIGN, "="},
 		{token.IDENTIFIER, "add"},
 		{token.LPAREN, "("},
-		{token.IDENTIFIER, "x"},
+		{token.IDENTIFIER, "foo"},
 		{token.COMMA, ","},
-		{token.IDENTIFIER, "y"},
+		{token.IDENTIFIER, "bar"},
 		{token.RPAREN, ")"},
 		{token.SEMICOLON, ";"},
 	}

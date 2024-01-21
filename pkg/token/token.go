@@ -76,3 +76,19 @@ const (
 	// LET represents the keyword let. it is used to declare variables.
 	LET TokenType = "LET"
 )
+
+// keywords defines the language reserves characters that cannot be used as identifiers.
+var keywords = map[string]TokenType{
+	"fn":  FUNCTION,
+	"let": LET,
+}
+
+// LookupIdentifier returns the token type for the given identifier.
+// it also checks if the identifier is a keyword and returns it if so.
+func LookupIdentifier(ident string) TokenType {
+	if tokType, ok := keywords[ident]; ok {
+		return tokType
+	}
+
+	return IDENTIFIER
+}

@@ -1,5 +1,7 @@
-// Package token is used to represent original source code.
-// it includes the token type and the token value
+/*
+* Package token is used to represent original source code.
+* it includes the token type and the token value
+ */
 package token
 
 /*
@@ -24,55 +26,53 @@ type Token struct {
 }
 
 const (
-	// Illegal represents a token that we don't recognize.
-	Illegal TokenType = "ILLEGAL"
+	// ILLEGAL represents a token that we don't recognize.
+	ILLEGAL TokenType = "ILLEGAL"
 
 	// EOF represents the end of the file. It helps the parser to know when to stop parsing.
 	EOF TokenType = "EOF"
 
 	// Identifier + Literals
 
-	// Identifier represents names given by the user to variables and functions. e.g. foo, bar x, y, z
-	Identifier TokenType = "IDENTIFIER"
+	// IDENTIFIER represents names given by the user to variables and functions. e.g. foo, bar x, y, z
+	IDENTIFIER TokenType = "IDENTIFIER"
 
-	// Integer represents the number values e.g 1, 2, 3
-	Integer TokenType = "INTEGER"
+	// INTEGER represents the number values e.g 1, 2, 3
+	INTEGER TokenType = "INTEGER"
 
 	// Operations
 
-	// Assign represents the assignment operation. eg. x = 1
-	Assign TokenType = "="
+	// ASSIGN represents the assignment operation. eg. x = 1
+	ASSIGN TokenType = "="
 
-	// Plus represents the addition operation.
-	Plus TokenType = "+"
+	// PLUS represents the addition operation.
+	PLUS TokenType = "+"
 
 	// Delimiters (Special Characters)
 
-	// Comma represents the comma operator.
-	Comma TokenType = ","
+	// COMMA represents the comma operator.
+	COMMA TokenType = ","
 
-	// Semicolon represents the semicolon operator.
-	Semicolon TokenType = ";"
+	// SEMICOLON represents the semicolon operator.
+	SEMICOLON TokenType = ";"
 
-	// LParen represents the left parenthesis operator.
-	LParen TokenType = "("
+	// LPAREN represents the left parenthesis operator.
+	LPAREN TokenType = "("
 
-	// RParen represents the right parenthesis operator.
-	RParen TokenType = ")"
+	// RPAREN represents the right parenthesis operator.
+	RPAREN TokenType = ")"
 
-	// LBrace represents the left brace operator.
-	LBrace TokenType = "{"
+	// LBRACE represents the left brace operator.
+	LBRACE TokenType = "{"
 
-	// RBrace represents the right brace operator.
-	RBrace TokenType = "}"
-
-	// LBracket represents the left bracket operator.
+	// RBRACE represents the right brace operator.
+	RBRACE TokenType = "}"
 
 	// 	Keywords (Are reserved for the language and cannot be used as identifiers)
 
-	// Function represents the keyword function.
-	Function TokenType = "FUNCTION"
+	// FUNCTION represents the keyword function.
+	FUNCTION TokenType = "FUNCTION"
 
-	// Let represents the keyword let. it is used to declare variables.
-	Let TokenType = "LET"
+	// LET represents the keyword let. it is used to declare variables.
+	LET TokenType = "LET"
 )

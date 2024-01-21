@@ -66,6 +66,8 @@ func (l *Lexer) readChar() {
 func (l *Lexer) NextToken() token.Token {
 	var tok token.Token
 
+	l.skipWhitespace()
+
 	switch l.ch {
 	case '=':
 		tok = newToken(token.ASSIGN, l.ch)
@@ -93,6 +95,19 @@ func (l *Lexer) NextToken() token.Token {
 	case 0:
 		tok.Literal = "" // EOF literal is an empty string
 		tok = newToken(token.EOF, l.ch)
+
+	default:
+		if isLetter(l.ch) {
+			tok.Literal = l.readIdentifier()
+			tok.Type = token.LookupIdentifier(tok.Literal)
+			return tok
+		} else if isDigit(l.ch) {
+			tok.Literal = l.readNumber()
+			tok.Type = token.INTEGER
+			return tok
+		} else {
+			tok = newToken(token.ILLEGAL, l.ch)
+		}
 	}
 
 	l.readChar()
@@ -106,4 +121,45 @@ func newToken(tokenType token.TokenType, ch byte) token.Token {
 		Type:    tokenType,
 		Literal: string(ch),
 	}
+}
+
+// readIdentifier reads an identifier and advances the read position until it encounters a non-letter character.
+func (l *Lexer) readIdentifier() string {
+	position := l.position
+
+	for isLetter(l.ch) {
+		l.readChar()
+	}
+
+	return l.input[position:l.position]
+}
+
+// isLetter returns true if the given character is a letter.
+// we also include the underscore character as a letter.
+func isLetter(ch byte) bool {
+	return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_'
+}
+
+// skipWhitespace skips over all the whitespace characters in the input.
+// jaba does not care about the whitespace characters like ruby or python.
+func (l *Lexer) skipWhitespace() {
+	for l.ch == ' ' || l.ch == '\t' || l.ch == '\n' || l.ch == '\r' {
+		l.readChar()
+	}
+}
+
+// readNumber reads an integer and advances the read position until it encounters a non-digit character.
+func (l *Lexer) readNumber() string {
+	position := l.position
+
+	for isDigit(l.ch) {
+		l.readChar()
+	}
+
+	return l.input[position:l.position]
+}
+
+// isDigit returns true if the given character is a digit.
+func isDigit(ch byte) bool {
+	return '0' <= ch && ch <= '9'
 }

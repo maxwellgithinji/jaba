@@ -52,6 +52,11 @@ func TestNextTokenJabaProgram(t *testing.T) {
 
 	5 < 10 > 5;
 
+	if (1 > 2) {
+		return true;
+	} else {
+		return false;
+	};
     `
 
 	tests := []struct {
@@ -110,6 +115,25 @@ func TestNextTokenJabaProgram(t *testing.T) {
 		{token.INTEGER, "10"},
 		{token.GT, ">"},
 		{token.INTEGER, "5"},
+		{token.SEMICOLON, ";"},
+
+		{token.IF, "if"},
+		{token.LPAREN, "("},
+		{token.INTEGER, "1"},
+		{token.GT, ">"},
+		{token.INTEGER, "2"},
+		{token.RPAREN, ")"},
+		{token.LBRACE, "{"},
+		{token.RETURN, "return"},
+		{token.TRUE, "true"},
+		{token.SEMICOLON, ";"},
+		{token.RBRACE, "}"},
+		{token.ELSE, "else"},
+		{token.LBRACE, "{"},
+		{token.RETURN, "return"},
+		{token.FALSE, "false"},
+		{token.SEMICOLON, ";"},
+		{token.RBRACE, "}"},
 		{token.SEMICOLON, ";"},
 	}
 

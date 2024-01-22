@@ -93,12 +93,32 @@ const (
 
 	// LET represents the keyword let. it is used to declare variables.
 	LET TokenType = "LET"
+
+	// TRUE represents the keyword true. it is used to represent boolean values.
+	TRUE TokenType = "TRUE"
+
+	// FALSE represents the keyword false. it is used to represent boolean values.
+	FALSE TokenType = "FALSE"
+
+	// IF represents the keyword if. it is used to represent if statements that help the program make decisions depending on the conditions.
+	IF TokenType = "IF"
+
+	// ELSE represents the keyword else. it is used with the if statement to make decisions. It can be used as a combination of if and else statements too.
+	ELSE TokenType = "ELSE"
+
+	// RETURN represents the keyword return. it is used to return a value from a function.
+	RETURN TokenType = "RETURN"
 )
 
 // keywords defines the language reserves characters that cannot be used as identifiers.
 var keywords = map[string]TokenType{
-	"fn":  FUNCTION,
-	"let": LET,
+	"fn":     FUNCTION,
+	"let":    LET,
+	"true":   TRUE,
+	"false":  FALSE,
+	"if":     IF,
+	"else":   ELSE,
+	"return": RETURN,
 }
 
 // LookupIdentifier returns the token type for the given identifier.

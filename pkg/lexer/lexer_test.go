@@ -47,6 +47,11 @@ func TestNextTokenJabaProgram(t *testing.T) {
     };
 
     let result = add(foo, bar);
+
+	!-/*5;
+
+	5 < 10 > 5;
+
     `
 
 	tests := []struct {
@@ -91,6 +96,20 @@ func TestNextTokenJabaProgram(t *testing.T) {
 		{token.COMMA, ","},
 		{token.IDENTIFIER, "bar"},
 		{token.RPAREN, ")"},
+		{token.SEMICOLON, ";"},
+
+		{token.NOPE, "!"},
+		{token.MINUS, "-"},
+		{token.SLASH, "/"},
+		{token.ASTERISK, "*"},
+		{token.INTEGER, "5"},
+		{token.SEMICOLON, ";"},
+
+		{token.INTEGER, "5"},
+		{token.LT, "<"},
+		{token.INTEGER, "10"},
+		{token.GT, ">"},
+		{token.INTEGER, "5"},
 		{token.SEMICOLON, ";"},
 	}
 

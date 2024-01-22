@@ -45,8 +45,26 @@ const (
 	// ASSIGN represents the assignment operation. eg. x = 1
 	ASSIGN TokenType = "="
 
-	// PLUS represents the addition operation.
+	// PLUS represents the addition operation. eg. x + 1
 	PLUS TokenType = "+"
+
+	// MINUS represents the subtraction operation. eg. x - 1
+	MINUS TokenType = "-"
+
+	// NOPE represents the negation operation. eg. !x
+	NOPE TokenType = "!"
+
+	// ASTERISK represents the multiplication operation. eg. x * 1
+	ASTERISK TokenType = "*"
+
+	// SLASH represents the division operation. eg. x / 1
+	SLASH TokenType = "/"
+
+	// LT represents the less than operation. eg. x < 1
+	LT TokenType = "<"
+
+	// GT represents the greater than operation. eg. x > 1
+	GT TokenType = ">"
 
 	// Delimiters (Special Characters)
 

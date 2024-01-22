@@ -2,6 +2,8 @@
 * Package lexer is used to transform the source code into tokens.
 * it uses the original source code representation from the token package
 * to transform user generated source code into tokens.
+* The lexer is not concerned about the syntax of the source code, but only
+* about the token representation.
 
 * Example:
 * user input:
@@ -74,6 +76,24 @@ func (l *Lexer) NextToken() token.Token {
 
 	case '+':
 		tok = newToken(token.PLUS, l.ch)
+
+	case '-':
+		tok = newToken(token.MINUS, l.ch)
+
+	case '!':
+		tok = newToken(token.NOPE, l.ch)
+
+	case '*':
+		tok = newToken(token.ASTERISK, l.ch)
+
+	case '/':
+		tok = newToken(token.SLASH, l.ch)
+
+	case '<':
+		tok = newToken(token.LT, l.ch)
+
+	case '>':
+		tok = newToken(token.GT, l.ch)
 
 	case ',':
 		tok = newToken(token.COMMA, l.ch)

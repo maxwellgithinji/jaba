@@ -57,6 +57,9 @@ func TestNextTokenJabaProgram(t *testing.T) {
 	} else {
 		return false;
 	};
+
+	10 == 10;
+	10 != 9;
     `
 
 	tests := []struct {
@@ -134,6 +137,16 @@ func TestNextTokenJabaProgram(t *testing.T) {
 		{token.FALSE, "false"},
 		{token.SEMICOLON, ";"},
 		{token.RBRACE, "}"},
+		{token.SEMICOLON, ";"},
+
+		{token.INTEGER, "10"},
+		{token.EQ, "=="},
+		{token.INTEGER, "10"},
+		{token.SEMICOLON, ";"},
+
+		{token.INTEGER, "10"},
+		{token.NEQ, "!="},
+		{token.INTEGER, "9"},
 		{token.SEMICOLON, ";"},
 	}
 

@@ -72,7 +72,17 @@ func (l *Lexer) NextToken() token.Token {
 
 	switch l.ch {
 	case '=':
-		tok = newToken(token.ASSIGN, l.ch)
+		if l.peekChar() == '=' {
+			ch := l.ch
+			l.readChar()
+			literal := string(ch) + string(l.ch)
+			tok = token.Token{
+				Type:    token.EQ,
+				Literal: literal,
+			}
+		} else {
+			tok = newToken(token.ASSIGN, l.ch)
+		}
 
 	case '+':
 		tok = newToken(token.PLUS, l.ch)
@@ -81,7 +91,18 @@ func (l *Lexer) NextToken() token.Token {
 		tok = newToken(token.MINUS, l.ch)
 
 	case '!':
-		tok = newToken(token.NOPE, l.ch)
+		if l.peekChar() == '=' {
+			ch := l.ch
+			l.readChar()
+			literal := string(ch) + string(l.ch)
+			tok = token.Token{
+				Type:    token.NEQ,
+				Literal: literal,
+			}
+
+		} else {
+			tok = newToken(token.NOPE, l.ch)
+		}
 
 	case '*':
 		tok = newToken(token.ASTERISK, l.ch)
@@ -182,4 +203,14 @@ func (l *Lexer) readNumber() string {
 // isDigit returns true if the given character is a digit.
 func isDigit(ch byte) bool {
 	return '0' <= ch && ch <= '9'
+}
+
+// peekChar returns the next character in the input without advancing the read position.
+// it has the same behavior as the readChar function except that it does not advance the read position.
+func (l *Lexer) peekChar() byte {
+	if l.readPosition >= len(l.input) {
+		return 0 // 0 is an Ascii code for null
+	} else {
+		return l.input[l.readPosition]
+	}
 }

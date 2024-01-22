@@ -66,6 +66,12 @@ const (
 	// GT represents the greater than operation. eg. x > 1
 	GT TokenType = ">"
 
+	// EQ represents the equality operation. eg. x == 1
+	EQ TokenType = "=="
+
+	// NEQ represents the not equal operation. eg. x!= 1
+	NEQ TokenType = "!="
+
 	// Delimiters (Special Characters)
 
 	// COMMA represents the comma operator.

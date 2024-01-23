@@ -26,10 +26,10 @@ type Statement interface {
 
 // Expression represents a structure that produces values
 type Expression interface {
-	// Node ensures each statement implements TokenLiteral
+	// Node ensures each expression implements TokenLiteral
 	Node
 
-	// expressionNode constructs a expression node
+	// expressionNode constructs ans expression node
 	expressionNode()
 }
 

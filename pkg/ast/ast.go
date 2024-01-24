@@ -7,18 +7,26 @@
 
 package ast
 
-import "github.com/maxwellgithinji/jaba/pkg/token"
+import (
+	"bytes"
+
+	"github.com/maxwellgithinji/jaba/pkg/token"
+)
 
 // Node represents a single branch in the abstract syntax tree
 // It ensures every method that implements it also returns a token literal
+// the String method is just for debugging
 type Node interface {
 	// TokenLiteral returns the actual value of the token
 	TokenLiteral() string
+
+	// String returns a string representation of an AST node
+	String() string
 }
 
 // Statement is structure that abstracts a list of tokens that resemble a single statement
 // Every method that implements Statement should return a token literal (from Node interface) and construct a
-// statement node. Statement does not produce a value. e.g. return 5, return foo
+// statement node. Statement does not produce a value. e.g. let x = 1, return 5
 type Statement interface {
 	// Node ensures each statement returns a token literal
 	Node
@@ -29,7 +37,9 @@ type Statement interface {
 
 // Expression is a structure that abstracts a list of tokens that represent an expression
 // Every method that implements Expression should return a token literal (from Node interface) and construct an
-// expression node. Expression produces a value e.g. return add(1, 2), return 1 + 4
+// expression node. Expression produces a value e.g. add(1, 2),  1 + 4, 1 * 5 - add(2, add(3,5)), !true, x==y
+// Everything in jaba except let and return statement is an expression
+// We can have a let expression that binds a function to a name. the function part is an expression
 type Expression interface {
 	// Node ensures each expression returns a token literal
 	Node
@@ -55,6 +65,15 @@ func (p *Program) TokenLiteral() string {
 	}
 }
 
+// String returns a string representation of a Program node
+func (p *Program) String() string {
+	var out bytes.Buffer
+	for _, statement := range p.Statements {
+		out.WriteString(statement.String())
+	}
+	return out.String()
+}
+
 // LetStatement defines the  3 parts of a let let statement: "let", "identifier", "expression"
 type LetStatement struct {
 	//  Token is token.LET i.e. {Type: LET, literal: "let"}
@@ -63,17 +82,29 @@ type LetStatement struct {
 	// The Name is the identifier for binding the expression/statement e.g. {token: IDENTIFIER, value: "foo"}
 	Name *Identifier
 
-	// Value represent both the expression and a statement. e.g. "let x = 5" (statement) and "let y = add(2,2)" (expression) can use the expression as the value
+	// Value represent both the expression ("let y = add(2,2)") and a statement ("let x = 5"). statement is already represented by the expression
 	Value Expression
 }
 
-// statementNode method is method that is used to indicate that the LetStatement struct
-// can be used to construct a statement in the Abstract Syntax Tree (AST).
+// statementNode method constructs a statement node in the Abstract Syntax Tree (AST) from the let statement
 func (l *LetStatement) statementNode() {}
 
 // TokenLiteral returns the a "let" expression in the AST
 func (l *LetStatement) TokenLiteral() string {
 	return l.Token.Literal
+}
+
+// String returns a string representation of a LetStatement node
+func (l *LetStatement) String() string {
+	var out bytes.Buffer
+	out.WriteString(l.TokenLiteral() + " ")
+	out.WriteString(l.Name.String())
+	out.WriteString(" = ")
+	if l.Value != nil {
+		out.WriteString(l.Value.String())
+	}
+	out.WriteString(";")
+	return out.String()
 }
 
 // Identifier represents the 2 parts of an identifier, IDENTIFIER and Value e.g. IDENTIFIER("foo")
@@ -85,13 +116,17 @@ type Identifier struct {
 	Value string
 }
 
-// expressionNode method is method that is used to indicate that the Identifier struct
-// can be used to construct an expression in the Abstract Syntax Tree (AST).
+// expressionNode method constructs a statement node in the Abstract Syntax Tree (AST) from the identifier
 func (i *Identifier) expressionNode() {}
 
 // TokenLiteral returns the actual value of the identifier e.g. returns "foo" in IDENTIFIER("foo")
 func (i *Identifier) TokenLiteral() string {
 	return i.Token.Literal
+}
+
+// String returns a string representation of an Identifier value
+func (i *Identifier) String() string {
+	return i.Value
 }
 
 // ReturnStatement contains the 2 parts of the return statement, RETURN(expression) e.g. "return add(5,5)"
@@ -103,11 +138,47 @@ type ReturnStatement struct {
 	Value Expression
 }
 
-// statementNode method is method that is used to indicate that the ReturnStatement struct
-// can be used to construct a statement in the Abstract Syntax Tree (AST).
+// statementNode method constructs a statement node in the Abstract Syntax Tree (AST) from the return statement
 func (r *ReturnStatement) statementNode() {}
 
 // TokenLiteral returns an actual value in a return statement e.g. add(5,5), 5, foo, nil
 func (r *ReturnStatement) TokenLiteral() string {
 	return r.Token.Literal
+}
+
+// String returns a string representation of a ReturnStatement node
+func (r *ReturnStatement) String() string {
+	var out bytes.Buffer
+	out.WriteString(r.TokenLiteral() + " ")
+	if r.Value != nil {
+		out.WriteString(r.Value.String())
+	}
+	out.WriteString(";")
+	return out.String()
+}
+
+// ExpressionStatement is an expression wrapper that contains the initial token of the expression and the rest of the expression
+type ExpressionStatement struct {
+	// Token is the first token of the expression
+	Token token.Token
+
+	// Value is the rest of the expression
+	Value Expression
+}
+
+// statementNode method constructs a statement node in the Abstract Syntax Tree (AST) from the expression statement
+func (e *ExpressionStatement) statementNode() {}
+
+// TokenLiteral returns the actual value of the expression e.g. add(5,5), --4, z == a
+func (e *ExpressionStatement) TokenLiteral() string {
+	return e.Token.Literal
+}
+
+// String returns a string representation of an ExpressionStatement node
+func (e *ExpressionStatement) String() string {
+	if e.Value != nil {
+		return e.Value.String()
+	}
+
+	return ""
 }

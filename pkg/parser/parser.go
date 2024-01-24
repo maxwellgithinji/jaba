@@ -5,6 +5,8 @@
 package parser
 
 import (
+	"fmt"
+
 	"github.com/maxwellgithinji/jaba/pkg/ast"
 	"github.com/maxwellgithinji/jaba/pkg/lexer"
 	"github.com/maxwellgithinji/jaba/pkg/token"
@@ -18,11 +20,17 @@ type Parser struct {
 	currentToken token.Token
 	// peekToken holds the value of the next token
 	peekToken token.Token
+
+	// errors are returned when the parser encounters a tokens that are not of the expected type
+	errors []string
 }
 
 // New returns a new Parser. it also reads 2 tokens to initialize the current and peek tokens
 func New(l *lexer.Lexer) *Parser {
-	p := &Parser{l: l}
+	p := &Parser{
+		l:      l,
+		errors: []string{},
+	}
 	p.nextToken()
 	p.nextToken()
 	return p
@@ -103,6 +111,7 @@ func (p *Parser) expectPeek(tokenType token.TokenType) bool {
 		p.nextToken()
 		return true
 	} else {
+		p.peekError(tokenType)
 		return false
 	}
 }
@@ -110,4 +119,15 @@ func (p *Parser) expectPeek(tokenType token.TokenType) bool {
 // peekTokenIs returns true if the next token is the given type
 func (p *Parser) peekTokenIs(tokenType token.TokenType) bool {
 	return p.peekToken.Type == tokenType
+}
+
+// Errors returns a slice containing all the errors
+func (p *Parser) Errors() []string {
+	return p.errors
+}
+
+// peekError appends error message to errors when it encounters a peek token that does not match the given type
+func (p *Parser) peekError(tokenType token.TokenType) {
+	message := fmt.Sprintf("expected next token to be %v, got %v", tokenType, p.peekToken.Type)
+	p.errors = append(p.errors, message)
 }

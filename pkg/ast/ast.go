@@ -14,8 +14,8 @@ import (
 )
 
 // Node represents a single branch in the abstract syntax tree
-// It ensures every method that implements it also returns a token literal
-// the String method is just for debugging
+// The implementor fulfills the Node interface by implementing
+// TokenLiteral() and String() methods
 type Node interface {
 	// TokenLiteral returns the actual value of the token
 	TokenLiteral() string
@@ -25,10 +25,10 @@ type Node interface {
 }
 
 // Statement is structure that abstracts a list of tokens that resemble a single statement
-// Every method that implements Statement should return a token literal (from Node interface) and construct a
-// statement node. Statement does not produce a value. e.g. let x = 1, return 5
+// The implementor fulfills the Statement Interface by implementing the statementNode() method
+// and by extension, the Node interface by implementing TokenLiteral() and String() methods
 type Statement interface {
-	// Node ensures each statement returns a token literal
+	// Node ensures each statement returns a token literal and a debug string
 	Node
 
 	// statementNode constructs a statement node from a combination of tokens that represent a statement
@@ -36,12 +36,10 @@ type Statement interface {
 }
 
 // Expression is a structure that abstracts a list of tokens that represent an expression
-// Every method that implements Expression should return a token literal (from Node interface) and construct an
-// expression node. Expression produces a value e.g. add(1, 2),  1 + 4, 1 * 5 - add(2, add(3,5)), !true, x==y
-// Everything in jaba except let and return statement is an expression
-// We can have a let expression that binds a function to a name. the function part is an expression
+// The implementor fulfills the Expression Interface by implementing the expressionNode() method
+// and by extension, the Node interface by implementing TokenLiteral() and String() methods
 type Expression interface {
-	// Node ensures each expression returns a token literal
+	// Node ensures each statement returns a token literal and a debug string
 	Node
 
 	// expressionNode constructs an expression node from a combination of tokens that represent an expression
@@ -49,13 +47,14 @@ type Expression interface {
 }
 
 // Program represents entry point where the root of the AST is initialized and other child nodes are built into the AST
+// It by extension fulfills the Node interface which is part of the Statement interface
+// by implementing TokenLiteral() and String() methods from the Node interface
 type Program struct {
-	// Statements contains a list of nodes (branches) which are building blocks the AST
+	// Statements contains a list of nodes (branches) which are building blocks of the AST
 	Statements []Statement
 }
 
-// TokenLiteral method returns the token literal of the first statement in the program.
-// (Root node of the AST)
+// TokenLiteral method returns the token literal of the first statement in the program.(Root node of the AST)
 // This method is used by the parser to determine the first token to be executed when a program is run.
 func (p *Program) TokenLiteral() string {
 	if len(p.Statements) > 0 {
@@ -75,6 +74,9 @@ func (p *Program) String() string {
 }
 
 // LetStatement defines the  3 parts of a let let statement: "let", "identifier", "expression"
+// It fulfils the Statement interface by implementing statementNode() method
+// It by extension fulfills the Node interface which is part of the Statement interface
+// by implementing TokenLiteral() and String() methods from the Node interface
 type LetStatement struct {
 	//  Token is token.LET i.e. {Type: LET, literal: "let"}
 	Token token.Token
@@ -82,7 +84,7 @@ type LetStatement struct {
 	// The Name is the identifier for binding the expression/statement e.g. {token: IDENTIFIER, value: "foo"}
 	Name *Identifier
 
-	// Value represent both the expression ("let y = add(2,2)") and a statement ("let x = 5"). statement is already represented by the expression
+	// Value represent both the expression ("add(2,2)") and a statement ("let x = 5"). statement is already represented by the expression
 	Value Expression
 }
 
@@ -108,6 +110,9 @@ func (l *LetStatement) String() string {
 }
 
 // Identifier represents the 2 parts of an identifier, IDENTIFIER and Value e.g. IDENTIFIER("foo")
+// It fulfils the Expression interface by implementing expressionNode() method
+// It by extension fulfills the Node interface which is part of the Expression interface
+// by implementing TokenLiteral() and String() methods from the Node interface
 type Identifier struct {
 	// Token is the token.IDENTIFIER
 	Token token.Token
@@ -130,6 +135,9 @@ func (i *Identifier) String() string {
 }
 
 // ReturnStatement contains the 2 parts of the return statement, RETURN(expression) e.g. "return add(5,5)"
+// It fulfils the Statement interface by implementing statementNode() method
+// It by extension fulfills the Node interface which is part of the Statement interface
+// by implementing TokenLiteral() and String() methods from the Node interface
 type ReturnStatement struct {
 	// Token is the token.RETURN
 	Token token.Token
@@ -158,6 +166,9 @@ func (r *ReturnStatement) String() string {
 }
 
 // ExpressionStatement is an expression wrapper that contains the initial token of the expression and the rest of the expression
+// It fulfils the Statement interface by implementing statementNode() method
+// It by extension fulfills the Node interface which is part of the Statement interface
+// by implementing TokenLiteral() and String() methods from the Node interface
 type ExpressionStatement struct {
 	// Token is the first token of the expression
 	Token token.Token
@@ -181,4 +192,26 @@ func (e *ExpressionStatement) String() string {
 	}
 
 	return ""
+}
+
+// IntegerLiteral represents an integer literal in int64 format
+// It fulfils the Expression interface by implementing expressionNode() method
+// It by extension fulfills the Node interface which is part of the Expression interface
+// by implementing TokenLiteral() and String() methods from the Node interface
+type IntegerLiteral struct {
+	Token token.Token
+	Value int64
+}
+
+// expressionNode method constructs an expression node in the Abstract Syntax Tree (AST) from the integer literal
+func (n *IntegerLiteral) expressionNode() {}
+
+// TokenLiteral returns the actual value of the literal in string format e.g. "5"
+func (n *IntegerLiteral) TokenLiteral() string {
+	return n.Token.Literal
+}
+
+// String returns a string representation of an integer literal node
+func (n *IntegerLiteral) String() string {
+	return n.Token.Literal
 }

@@ -126,3 +126,33 @@ func TestReturnStatements(t *testing.T) {
 	}
 
 }
+
+func TestIdentifierExpression(t *testing.T) {
+	input := "foobar"
+
+	l := lexer.New(input)
+
+	p := New(l)
+
+	program := p.ParseProgram()
+
+	checkParseError(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Statements expected 1 statements, got: %d", len(program.Statements))
+	}
+
+	statement, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Errorf("statement not ast.ExpressionStatement, got: %T", statement)
+	}
+
+	identifierExpression, ok := statement.Value.(*ast.Identifier)
+	if !ok {
+		t.Errorf("expressionStatement.Value not *ast.Identifier, got: %T", statement.Value)
+	}
+
+	if identifierExpression.TokenLiteral() != "foobar" {
+		t.Errorf("identifierExpression.TokenLiteral() is not 'foobar', got: %s", identifierExpression.TokenLiteral())
+	}
+}

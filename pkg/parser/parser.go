@@ -23,6 +23,12 @@ type Parser struct {
 
 	// errors are returned when the parser encounters a tokens that are not of the expected type
 	errors []string
+
+	// prefixParseFns is used to get the correct prefix for the current token
+	prefixParseFns map[token.TokenType]prefixParseFn
+
+	// infixParseFns is used to get the correct infix for the current token
+	infixParseFns map[token.TokenType]infixParseFn
 }
 
 // New returns a new Parser. it also reads 2 tokens to initialize the current and peek tokens
@@ -31,6 +37,10 @@ func New(l *lexer.Lexer) *Parser {
 		l:      l,
 		errors: []string{},
 	}
+
+	p.prefixParseFns = make(map[token.TokenType]prefixParseFn)
+	p.registerPrefix(token.IDENTIFIER, p.parseIdentifier)
+
 	p.nextToken()
 	p.nextToken()
 	return p
@@ -72,7 +82,7 @@ func (p *Parser) parseStatement() ast.Statement {
 	case token.RETURN:
 		return p.parseReturnStatement()
 	default:
-		return nil
+		return p.parseExpressionStatement()
 	}
 }
 
@@ -146,4 +156,84 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 	}
 
 	return statement
+}
+
+type (
+	// prefixParseFn  parses tokens that are in a prefix position
+	prefixParseFn func() ast.Expression
+
+	// infixParseFn parses tokens that are in an infix position
+	// The argument passed here is on the left side of the infix operator
+	infixParseFn func(ast.Expression) ast.Expression
+)
+
+// This iota is used to order the constants based on precedence from the lowest to the highest
+const (
+	// _ has the value 0
+	_ int = iota
+
+	// LOWEST has the value 1
+	LOWEST
+
+	// EQUALS has the value 2 (==)
+	EQUALS
+
+	// LESSGREATER has the value 3 (< OR >)
+	LESSGREATER
+
+	// SUM has the value 4 (+)
+	SUM
+	// PRODUCT has the value 5 (*)
+	PRODUCT
+
+	// PREFIX has the value 6 (-x or !x)
+	PREFIX
+
+	// CALL has the value 7. add(x, y)
+	CALL
+)
+
+// registerPrefix records a prefix token
+func (p *Parser) registerPrefix(tokenType token.TokenType, fn prefixParseFn) {
+	p.prefixParseFns[tokenType] = fn
+}
+
+// registerInfix records an infix token
+func (p *Parser) registerInfix(tokenType token.TokenType, fn infixParseFn) {
+	p.infixParseFns[tokenType] = fn
+}
+
+// parseExpressionStatement creates the AST representation of an expression statement
+func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
+	statement := &ast.ExpressionStatement{Token: p.currentToken}
+
+	// we pass the lowest possible precedence since we are initializing and have nothing to compare against
+	statement.Value = p.parseExpression(LOWEST)
+
+	// we wont return an error if the expression in the repl does not end with a semicolon
+	if p.peekTokenIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return statement
+}
+
+// parseExpression is a helper function to parse supported expressions
+// TODO: add more docs to explain supported expressions
+func (p *Parser) parseExpression(precedence int) ast.Expression {
+	prefix := p.prefixParseFns[p.currentToken.Type]
+
+	if prefix == nil {
+		return nil
+	}
+
+	leftExpression := prefix()
+
+	return leftExpression
+}
+
+// parseIdentifier returns the current token and the literal it represents
+// Note: we can return an identifier since Identifier implements Expression interface
+func (p *Parser) parseIdentifier() ast.Expression {
+	return &ast.Identifier{Token: p.currentToken, Value: p.currentToken.Literal}
 }

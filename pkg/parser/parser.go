@@ -6,6 +6,7 @@ package parser
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/maxwellgithinji/jaba/pkg/ast"
 	"github.com/maxwellgithinji/jaba/pkg/lexer"
@@ -40,6 +41,7 @@ func New(l *lexer.Lexer) *Parser {
 
 	p.prefixParseFns = make(map[token.TokenType]prefixParseFn)
 	p.registerPrefix(token.IDENTIFIER, p.parseIdentifier)
+	p.registerPrefix(token.INTEGER, p.parseIntegerLiteral)
 
 	p.nextToken()
 	p.nextToken()
@@ -233,7 +235,23 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 }
 
 // parseIdentifier returns the current token and the literal it represents
-// Note: we can return an identifier since Identifier implements Expression interface
+// Note: we can return ast.Identifier struct since it fulfills ast.Expression interface by implementing its methods
 func (p *Parser) parseIdentifier() ast.Expression {
 	return &ast.Identifier{Token: p.currentToken, Value: p.currentToken.Literal}
+}
+
+// parseIntegerLiteral returns the current token and the literal it represents
+// Note: we can return ast.IntegerLiteral struct since it fulfills ast.Expression interface by implementing its methods
+func (p *Parser) parseIntegerLiteral() ast.Expression {
+	literal := &ast.IntegerLiteral{Token: p.currentToken}
+	value, err := strconv.ParseInt(p.currentToken.Literal, 10, 64)
+	if err != nil {
+		message := fmt.Sprintf("could not parse %q as integer", p.currentToken.Literal)
+		p.errors = append(p.errors, message)
+		return nil
+	}
+
+	literal.Value = value
+
+	return literal
 }

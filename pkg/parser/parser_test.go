@@ -1,18 +1,21 @@
 package parser
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/maxwellgithinji/jaba/pkg/ast"
 	"github.com/maxwellgithinji/jaba/pkg/lexer"
 )
 
+// TODO: add support for semicolons
+
 func TestLetStatement(t *testing.T) {
 	input := `
-		let x = 1;
-		let y = 12;
-		let foo = 123;
-		let bar = 1;
+		let x = 1
+		let y = 12
+		let foo = 123
+		let bar = 1
 `
 
 	l := lexer.New(input)
@@ -190,4 +193,67 @@ func TestIntegerLiteralExpression(t *testing.T) {
 		t.Errorf("literal.TokenLiteral() is not %s, got: %s", "5", literal.TokenLiteral())
 	}
 
+}
+
+func TestParsingPrefixExpression(t *testing.T) {
+	prefixTests := []struct {
+		input        string
+		operator     string
+		integerValue int64
+	}{
+		{"!5", "!", 5},
+		{"-15", "-", 15},
+	}
+
+	for _, tt := range prefixTests {
+		l := lexer.New(tt.input)
+
+		p := New(l)
+
+		program := p.ParseProgram()
+
+		checkParseError(t, p)
+
+		if len(program.Statements) != 1 {
+			t.Fatalf("program.Statements expected 1 statements, got: %d", len(program.Statements))
+		}
+
+		statement, ok := program.Statements[0].(*ast.ExpressionStatement)
+		if !ok {
+			t.Errorf("program.Statements[0] is not ast.ExpressionStatement, got: %T", statement)
+		}
+
+		expression, ok := statement.Value.(*ast.PrefixExpression)
+		if !ok {
+			t.Errorf("statement.Value is not ast.PrefixExpression, got: %T", statement.Value)
+		}
+
+		if expression.Operator != tt.operator {
+			t.Errorf("expression.Operator is not %s, got: %s", tt.operator, expression.Operator)
+		}
+
+		if !testIntegerLiteral(t, expression.Right, tt.integerValue) {
+			return
+		}
+	}
+}
+
+func testIntegerLiteral(t *testing.T, expression ast.Expression, value int64) bool {
+	integer, ok := expression.(*ast.IntegerLiteral)
+	if !ok {
+		t.Errorf("expression is not an ast.IntegerLiteral, got %T", expression)
+		return false
+	}
+
+	if integer.Value != value {
+		t.Errorf("integer.Value is not %d, got %d", value, integer.Value)
+		return false
+	}
+
+	if integer.TokenLiteral() != fmt.Sprintf("%d", value) {
+		t.Errorf("integer.TokenLiteral() is not %d, got %s", value, integer.TokenLiteral())
+		return false
+	}
+
+	return true
 }

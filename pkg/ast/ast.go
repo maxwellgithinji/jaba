@@ -170,10 +170,8 @@ func (r *ReturnStatement) String() string {
 // It by extension fulfills the Node interface which is part of the Statement interface
 // by implementing TokenLiteral() and String() methods from the Node interface
 type ExpressionStatement struct {
-	// Token is the first token of the expression
 	Token token.Token
 
-	// Value is the rest of the expression
 	Value Expression
 }
 
@@ -200,6 +198,8 @@ func (e *ExpressionStatement) String() string {
 // by implementing TokenLiteral() and String() methods from the Node interface
 type IntegerLiteral struct {
 	Token token.Token
+
+	// Value asserts the integer value
 	Value int64
 }
 
@@ -214,4 +214,36 @@ func (n *IntegerLiteral) TokenLiteral() string {
 // String returns a string representation of an integer literal node
 func (n *IntegerLiteral) String() string {
 	return n.Token.Literal
+}
+
+// PrefixExpression represents an expression that is placed on the left side of other expressions e.g ! in !5
+// It fulfils the Expression interface by implementing expressionNode() method
+// It by extension fulfills the Node interface which is part of the Expression interface
+// by implementing TokenLiteral() and String() methods from the Node interface
+type PrefixExpression struct {
+	Token token.Token
+
+	// Operator is a type of prefix that appears on the left side of the expression e.g. ! in !5
+	Operator string
+
+	// Right represents the expression on the right hand side of the operator e.g. 5 in !5
+	Right Expression
+}
+
+// expressionNode method constructs an expression node in the Abstract Syntax Tree (AST) from the prefix expression
+func (p *PrefixExpression) expressionNode() {}
+
+// TokenLiteral returns the actual value of the prefix expression e.g.!5
+func (p *PrefixExpression) TokenLiteral() string {
+	return p.Token.Literal
+}
+
+// String returns a string representation of a PrefixExpression node
+func (p *PrefixExpression) String() string {
+	var out bytes.Buffer
+	out.WriteString("(")
+	out.WriteString(p.Operator)
+	out.WriteString(p.Right.String())
+	out.WriteString(")")
+	return out.String()
 }

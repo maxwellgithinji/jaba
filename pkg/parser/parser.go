@@ -45,6 +45,16 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.NOPE, p.parsePrefixExpression)
 	p.registerPrefix(token.MINUS, p.parsePrefixExpression)
 
+	p.infixParseFns = make(map[token.TokenType]infixParseFn)
+	p.registerInfix(token.EQ, p.parseInfixExpression)
+	p.registerInfix(token.NEQ, p.parseInfixExpression)
+	p.registerInfix(token.LT, p.parseInfixExpression)
+	p.registerInfix(token.GT, p.parseInfixExpression)
+	p.registerInfix(token.PLUS, p.parseInfixExpression)
+	p.registerInfix(token.MINUS, p.parseInfixExpression)
+	p.registerInfix(token.SLASH, p.parseInfixExpression)
+	p.registerInfix(token.ASTERISK, p.parseInfixExpression)
+
 	p.nextToken()
 	p.nextToken()
 	return p
@@ -233,6 +243,20 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 
 	leftExpression := prefix()
 
+	// the loop helps the parser find the whole expression and stops when it finds the lowest precedence operator
+	for !p.peekTokenIs(token.SEMICOLON) && precedence < p.peekPrecedence() {
+		infix := p.infixParseFns[p.peekToken.Type]
+
+		// return the left expression if no infix operator is found
+		if infix == nil {
+			return leftExpression
+		}
+
+		p.nextToken()
+
+		leftExpression = infix(leftExpression)
+	}
+
 	return leftExpression
 }
 
@@ -278,6 +302,58 @@ func (p *Parser) parsePrefixExpression() ast.Expression {
 
 	// parse the expression on the right side
 	expression.Right = p.parseExpression(PREFIX)
+
+	return expression
+}
+
+// precedences is a hashmap containing infix operator tokens mapped to respective precedence values
+var precedences = map[token.TokenType]int{
+	token.EQ:       EQUALS,
+	token.NEQ:      EQUALS,
+	token.LT:       LESSGREATER,
+	token.GT:       LESSGREATER,
+	token.PLUS:     SUM,
+	token.MINUS:    SUM,
+	token.SLASH:    PRODUCT,
+	token.ASTERISK: PRODUCT,
+}
+
+// peekPrecedence returns the precedence associated with the peek token
+// If the peek token has no precedence, it defaults to LOWEST.
+func (p *Parser) peekPrecedence() int {
+	if precedence, ok := precedences[p.peekToken.Type]; ok {
+		return precedence
+	}
+
+	return LOWEST
+}
+
+// currentPrecedence returns the precedence associated with the current token
+// If the current token has no precedence, it defaults to LOWEST.
+func (p *Parser) currentPrecedence() int {
+	if precedence, ok := precedences[p.currentToken.Type]; ok {
+		return precedence
+	}
+
+	return LOWEST
+}
+
+// parseInfixExpression returns a representation of an infix operator that contains the left expression, operator and right expression
+// Note: we can return ast.InfixExpression struct since it fulfills ast.Expression interface by implementing its methods
+func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
+	expression := &ast.InfixExpression{
+		Token:    p.currentToken,
+		Left:     left,
+		Operator: p.currentToken.Literal,
+	}
+
+	precedences := p.currentPrecedence()
+
+	// skip to the right side
+	p.nextToken()
+
+	// parse the expression on the right side
+	expression.Right = p.parseExpression(precedences)
 
 	return expression
 }

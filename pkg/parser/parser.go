@@ -42,6 +42,8 @@ func New(l *lexer.Lexer) *Parser {
 	p.prefixParseFns = make(map[token.TokenType]prefixParseFn)
 	p.registerPrefix(token.IDENTIFIER, p.parseIdentifier)
 	p.registerPrefix(token.INTEGER, p.parseIntegerLiteral)
+	p.registerPrefix(token.NOPE, p.parsePrefixExpression)
+	p.registerPrefix(token.MINUS, p.parsePrefixExpression)
 
 	p.nextToken()
 	p.nextToken()
@@ -221,11 +223,11 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 }
 
 // parseExpression is a helper function to parse supported expressions
-// TODO: add more docs to explain supported expressions
 func (p *Parser) parseExpression(precedence int) ast.Expression {
 	prefix := p.prefixParseFns[p.currentToken.Type]
 
 	if prefix == nil {
+		p.noPrefixParseError(p.currentToken.Type)
 		return nil
 	}
 
@@ -234,13 +236,19 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 	return leftExpression
 }
 
-// parseIdentifier returns the current token and the literal it represents
+// noPrefixParseError returns a formatted error when parser encounters no prefix
+func (p *Parser) noPrefixParseError(tokenType token.TokenType) {
+	message := fmt.Sprintf("no prefix parse function for %s found", tokenType)
+	p.errors = append(p.errors, message)
+}
+
+// parseIdentifier returns a representation of an identifier  which contains the token as sIDENTIFIER and the value
 // Note: we can return ast.Identifier struct since it fulfills ast.Expression interface by implementing its methods
 func (p *Parser) parseIdentifier() ast.Expression {
 	return &ast.Identifier{Token: p.currentToken, Value: p.currentToken.Literal}
 }
 
-// parseIntegerLiteral returns the current token and the literal it represents
+// parseIntegerLiteral returns a representation of an integer literal which contains the token and value in int64 format
 // Note: we can return ast.IntegerLiteral struct since it fulfills ast.Expression interface by implementing its methods
 func (p *Parser) parseIntegerLiteral() ast.Expression {
 	literal := &ast.IntegerLiteral{Token: p.currentToken}
@@ -254,4 +262,22 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 	literal.Value = value
 
 	return literal
+}
+
+// parsePrefixExpression returns a representation of a prefix expression which contains an expression on the left and right side
+// Note: we can return ast.IntegerLiteral struct since it fulfills ast.Expression interface by implementing its methods
+func (p *Parser) parsePrefixExpression() ast.Expression {
+	// left side
+	expression := &ast.PrefixExpression{
+		Token:    p.currentToken,
+		Operator: p.currentToken.Literal,
+	}
+
+	// skip to the right side
+	p.nextToken()
+
+	// parse the expression on the right side
+	expression.Right = p.parseExpression(PREFIX)
+
+	return expression
 }

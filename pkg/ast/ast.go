@@ -78,7 +78,7 @@ func (p *Program) String() string {
 // It by extension fulfills the Node interface which is part of the Statement interface
 // by implementing TokenLiteral() and String() methods from the Node interface
 type LetStatement struct {
-	//  Token is token.LET i.e. {Type: LET, literal: "let"}
+	//  Token represents the "let" token
 	Token token.Token
 
 	// The Name is the identifier for binding the expression/statement e.g. {token: IDENTIFIER, value: "foo"}
@@ -114,7 +114,7 @@ func (l *LetStatement) String() string {
 // It by extension fulfills the Node interface which is part of the Expression interface
 // by implementing TokenLiteral() and String() methods from the Node interface
 type Identifier struct {
-	// Token is the token.IDENTIFIER
+	// Token represents the "identifier" token
 	Token token.Token
 
 	// Value is the actual value the identifier represents e.g. "foo"
@@ -139,7 +139,7 @@ func (i *Identifier) String() string {
 // It by extension fulfills the Node interface which is part of the Statement interface
 // by implementing TokenLiteral() and String() methods from the Node interface
 type ReturnStatement struct {
-	// Token is the token.RETURN
+	// Token represent the return token
 	Token token.Token
 
 	// Value is the actual expression being returned e.g. add(5,5), 5, foo, nil. note, we can return both statements and expressions
@@ -165,13 +165,15 @@ func (r *ReturnStatement) String() string {
 	return out.String()
 }
 
-// ExpressionStatement is an expression wrapper that contains the initial token of the expression and the rest of the expression
+// ExpressionStatement is an expression wrapper that groups expressions
 // It fulfils the Statement interface by implementing statementNode() method
 // It by extension fulfills the Node interface which is part of the Statement interface
 // by implementing TokenLiteral() and String() methods from the Node interface
 type ExpressionStatement struct {
+	// Token represents any token representation being parsed as an expression
 	Token token.Token
 
+	// Value is any value representation being parsed as an expression
 	Value Expression
 }
 
@@ -197,9 +199,10 @@ func (e *ExpressionStatement) String() string {
 // It by extension fulfills the Node interface which is part of the Expression interface
 // by implementing TokenLiteral() and String() methods from the Node interface
 type IntegerLiteral struct {
+	// Token represent the integer token e.g. "5"
 	Token token.Token
 
-	// Value asserts the integer value
+	// Value asserts the integer value. e.g. "5" will be returned as 5 of type int64
 	Value int64
 }
 
@@ -221,6 +224,7 @@ func (n *IntegerLiteral) String() string {
 // It by extension fulfills the Node interface which is part of the Expression interface
 // by implementing TokenLiteral() and String() methods from the Node interface
 type PrefixExpression struct {
+	// Token represent the prefix operator token e.g. !
 	Token token.Token
 
 	// Operator is a type of prefix that appears on the left side of the expression e.g. ! in !5
@@ -244,6 +248,43 @@ func (p *PrefixExpression) String() string {
 	out.WriteString("(")
 	out.WriteString(p.Operator)
 	out.WriteString(p.Right.String())
+	out.WriteString(")")
+	return out.String()
+}
+
+// InfixExpression represents the 3 parts of an infix expression, left operand, operator, right operand. e.g. 5 + 7
+// It fulfils the Expression interface by implementing expressionNode() method
+// It by extension fulfills the Node interface which is part of the Expression interface
+// by implementing TokenLiteral() and String() methods from the Node interface
+type InfixExpression struct {
+	// Token represent the infix operator token e.g. +
+	Token token.Token
+
+	// Left represents the expression on the left hand side of the operator e.g. 5 in 5 + 7
+	Left Expression
+
+	// Operator is a type of operator that appears on the left side of the expression e.g. + in 5 + 7
+	Operator string
+
+	// Right represents the expression on the right hand side of the operator e.g. 7 in 5 + 7
+	Right Expression
+}
+
+// expressionNode method constructs an expression node in the Abstract Syntax Tree (AST) from the infix expression
+func (i *InfixExpression) expressionNode() {}
+
+// TokenLiteral returns the actual value of the infix expression e.g. 5 + 7
+func (i *InfixExpression) TokenLiteral() string {
+	return i.Token.Literal
+}
+
+// String returns a string representation of an InfixExpression node
+func (i *InfixExpression) String() string {
+	var out bytes.Buffer
+	out.WriteString("(")
+	out.WriteString(i.Left.String())
+	out.WriteString(" " + i.Operator + " ")
+	out.WriteString(i.Right.String())
 	out.WriteString(")")
 	return out.String()
 }

@@ -14,10 +14,11 @@ import (
 	"github.com/maxwellgithinji/jaba/pkg/token"
 )
 
-// Prompt indicates the user can enter the jaba program input.
+// Prompt indicates the user start typing jaba code.
 const Prompt = ">>"
 
-// Run is a helper function that runs the jaba program. It prints the out the tokens of the user input.
+// Run is a Read Eval Print Loop function that runs the jaba program.
+// it helps the user code the jaba program on the command line
 func Run(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
 	for {

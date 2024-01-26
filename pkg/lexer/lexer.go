@@ -24,7 +24,7 @@ package lexer
 
 import "github.com/maxwellgithinji/jaba/pkg/token"
 
-// Lexer represents the structure that will hold all the information about the lexer.
+// Lexer defines properties required to turn source code into tokens
 type Lexer struct {
 	// input represent the source code to be tokenized.
 	input string

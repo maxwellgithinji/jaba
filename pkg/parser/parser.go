@@ -13,22 +13,24 @@ import (
 	"github.com/maxwellgithinji/jaba/pkg/token"
 )
 
-// Parser contains a pointer to an instance of lexer, the current and peek token
+// Parser defines properties requires for parsing and turning tokens to AST nodes
 type Parser struct {
-	// l is a pointer to an instance of lexer which repeatedly calls nextToken to read the next token
+	// l is a pointer to an instance of lexer. when used, it calls the next token with its New() method
 	l *lexer.Lexer
+
 	//currentToken holds the value of the current token under examination
 	currentToken token.Token
+
 	// peekToken holds the value of the next token
 	peekToken token.Token
 
-	// errors are returned when the parser encounters a tokens that are not of the expected type
+	// errors holds a list of errors that occur when parsing
 	errors []string
 
-	// prefixParseFns is used to get the correct prefix for the current token
+	// prefixParseFns holds a map of prefix functions
 	prefixParseFns map[token.TokenType]prefixParseFn
 
-	// infixParseFns is used to get the correct infix for the current token
+	// infixParseFns holds a map of infix functions
 	infixParseFns map[token.TokenType]infixParseFn
 }
 
@@ -243,11 +245,11 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 
 	leftExpression := prefix()
 
-	// the loop helps the parser find the whole expression and stops when it finds the lowest precedence operator
+	// the loop helps the parser find the whole expression
 	for !p.peekTokenIs(token.SEMICOLON) && precedence < p.peekPrecedence() {
 		infix := p.infixParseFns[p.peekToken.Type]
 
-		// return the left expression if no infix operator is found
+		// return the left expression if no infix is found
 		if infix == nil {
 			return leftExpression
 		}

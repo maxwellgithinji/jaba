@@ -321,6 +321,40 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 	}
 }
 
+func TestBooleanExpression(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected bool
+	}{
+		{"true", true},
+		{"false", false},
+	}
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		program := p.ParseProgram()
+		checkParseError(t, p)
+
+		if len(program.Statements) != 1 {
+			t.Fatalf("program.Statements expected 1 statements, got: %d", len(program.Statements))
+		}
+
+		statement, ok := program.Statements[0].(*ast.ExpressionStatement)
+		if !ok {
+			t.Errorf("program.Statements[0] is not ast.ExpressionStatement, got: %T", statement)
+		}
+
+		boolean, ok := statement.Value.(*ast.Boolean)
+		if !ok {
+			t.Errorf("statement.Value is not ast.Boolean, got: %T", statement.Value)
+		}
+		if boolean.Value != tt.expected {
+			t.Errorf("boolean.Value is not %t, got: %t", tt.expected, boolean.Value)
+		}
+	}
+}
+
 // Test Helper function
 func testLetStatements(t *testing.T, s ast.Statement, name string) bool {
 	if s.TokenLiteral() != "let" {

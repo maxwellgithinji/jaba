@@ -288,3 +288,28 @@ func (i *InfixExpression) String() string {
 	out.WriteString(")")
 	return out.String()
 }
+
+// Boolean represents whose value is true or false
+// It fulfils the Expression interface by implementing expressionNode() method
+// It by extension fulfills the Node interface which is part of the Expression interface
+// by implementing TokenLiteral() and String() methods from the Node interface
+type Boolean struct {
+	// Token represents either token.True or token.False
+	Token token.Token
+
+	// Value is true or false
+	Value bool
+}
+
+// expressionNode method constructs an expression node in the Abstract Syntax Tree (AST) from the boolean
+func (b Boolean) expressionNode() {}
+
+// TokenLiteral returns the string value of the boolean e.g. "true" or "false"
+func (b Boolean) TokenLiteral() string {
+	return b.Token.Literal
+}
+
+// String returns a string representation of a Boolean node
+func (b Boolean) String() string {
+	return b.Token.Literal
+}

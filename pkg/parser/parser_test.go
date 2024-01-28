@@ -409,6 +409,101 @@ func testLetStatements(t *testing.T, s ast.Statement, name string) bool {
 	return true
 }
 
+func TestIfExpression(t *testing.T) {
+	input := "if (x < y ){ x }"
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParseError(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Statements expected 1 statements, got: %d", len(program.Statements))
+	}
+
+	statement, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement, got: %T", statement)
+	}
+
+	expression, ok := statement.Value.(*ast.IfExpression)
+	if !ok {
+		t.Fatalf("statement.Value is not ast.IfExpression, got: %T", statement.Value)
+	}
+
+	if !testInfixExpression(t, expression.Condition, "x", "<", "y") {
+		return
+	}
+
+	if len(expression.Consequence.Statements) != 1 {
+		t.Fatalf("expression.Consequence.Statements expected 1 statements, got: %d", len(expression.Consequence.Statements))
+	}
+
+	consequence, ok := expression.Consequence.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("expression.Consequence.Statements[0] is not ast.ExpressionStatement, got: %T", consequence)
+	}
+
+	if !testIdentifier(t, consequence.Value, "x") {
+		return
+	}
+
+	if expression.Alternative != nil {
+		t.Errorf("expression.Alternative.Statements was not nil, got: %+v", expression.Alternative)
+	}
+}
+
+func TestIfElseExpression(t *testing.T) {
+	input := "if (x < y) { x } else {y}"
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParseError(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Statements expected 1 statements, got: %d", len(program.Statements))
+	}
+
+	statement, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement, got: %T", statement)
+	}
+
+	expression, ok := statement.Value.(*ast.IfExpression)
+	if !ok {
+		t.Fatalf("statement.Value is not ast.IfExpression, got: %T", statement.Value)
+	}
+
+	if !testInfixExpression(t, expression.Condition, "x", "<", "y") {
+		return
+	}
+
+	if len(expression.Consequence.Statements) != 1 {
+		t.Fatalf("expression.Consequence.Statements expected 1 statements, got: %d", len(expression.Consequence.Statements))
+	}
+
+	consequence, ok := expression.Consequence.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("expression.Consequence.Statements[0] is not ast.ExpressionStatement, got: %T", consequence)
+	}
+
+	if !testIdentifier(t, consequence.Value, "x") {
+		return
+	}
+
+	if len(expression.Alternative.Statements) != 1 {
+		t.Errorf("len expression.Alternative.Statements was not 1, got: %+v", len(expression.Alternative.Statements))
+	}
+
+	alternative, ok := expression.Alternative.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("expression.Alternative.Statements[0] is not ast.ExpressionStatement, got: %T", alternative)
+	}
+
+	if !testIdentifier(t, alternative.Value, "y") {
+		return
+	}
+}
+
 func testInfixExpression(t *testing.T, expression ast.Expression, left interface{}, operator string, right interface{}) bool {
 	operatorExpression, ok := expression.(*ast.InfixExpression)
 	if !ok {

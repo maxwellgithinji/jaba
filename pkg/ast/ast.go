@@ -313,3 +313,74 @@ func (b Boolean) TokenLiteral() string {
 func (b Boolean) String() string {
 	return b.Token.Literal
 }
+
+// IfExpression represents the composition of an if expression that represents an if-else-condition
+// It fulfils the Expression interface by implementing expressionNode() method
+// It by extension fulfills the Node interface which is part of the Expression interface
+// by implementing TokenLiteral() and String() methods from the Node interface
+type IfExpression struct {
+	// Token represents the if token
+	Token token.Token
+
+	// Condition represents the expression the if expression is checking
+	Condition Expression
+
+	// Consequence represents the block statement to be executed when the condition is met
+	Consequence *BlockStatement
+
+	// Alternative represents the block statement to be executed when the condition is not met (ELSE)
+	Alternative *BlockStatement
+}
+
+// expressionNode method constructs an expression node in the Abstract Syntax Tree (AST) from the if expression
+func (i *IfExpression) expressionNode() {}
+
+// TokenLiteral returns the actual value of the if expression e.g. 5 < 7
+func (i *IfExpression) TokenLiteral() string {
+	return i.Token.Literal
+}
+
+// String returns a string representation of an IfExpression node
+func (i *IfExpression) String() string {
+	var out bytes.Buffer
+	out.WriteString("if")
+	out.WriteString(i.Condition.String())
+	out.WriteString(" ")
+	out.WriteString(i.Consequence.String())
+
+	if i.Alternative != nil {
+		out.WriteString("else ")
+		out.WriteString(i.Alternative.String())
+	}
+
+	return out.String()
+}
+
+// BlockStatement represents a list of statements that can be structured in a block like manner
+// It fulfils the Statement interface by implementing statementNode() method
+// It by extension fulfills the Node interface which is part of the Statement interface
+// by implementing TokenLiteral() and String() methods from the Node interface
+type BlockStatement struct {
+	// Token represents { which indicated the start of a block statement i.e token.RBRACE {
+	Token token.Token
+
+	// Statements represents the list of statements in the block
+	Statements []Statement
+}
+
+// statementNode method constructs a statement node in the Abstract Syntax Tree (AST) from the block statement
+func (b *BlockStatement) statementNode() {}
+
+// TokenLiteral returns the actual value of the block statement
+func (b *BlockStatement) TokenLiteral() string {
+	return b.Token.Literal
+}
+
+// String returns a string representation of a BlockStatement node
+func (b *BlockStatement) String() string {
+	var out bytes.Buffer
+	for _, s := range b.Statements {
+		out.WriteString(s.String())
+	}
+	return out.String()
+}

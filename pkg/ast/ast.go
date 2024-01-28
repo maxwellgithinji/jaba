@@ -9,6 +9,7 @@ package ast
 
 import (
 	"bytes"
+	"strings"
 
 	"github.com/maxwellgithinji/jaba/pkg/token"
 )
@@ -382,5 +383,51 @@ func (b *BlockStatement) String() string {
 	for _, s := range b.Statements {
 		out.WriteString(s.String())
 	}
+	return out.String()
+}
+
+// FunctionLiteral defines the structure of a function which includes the fn token, parameters and the body
+// It fulfils the Expression interface by implementing expressionNode() method
+// It by extension fulfills the Node interface which is part of the Expression interface
+// by implementing TokenLiteral() and String() methods from the Node interface
+type FunctionLiteral struct {
+	// Token represents the fn token
+	Token token.Token
+
+	// Parameters represents the parameters of the function
+	Parameters []*Identifier
+
+	// Body represents the body of the function
+	Body *BlockStatement
+}
+
+// expressionNode method constructs an expression node in the Abstract Syntax Tree (AST) from the function literal
+func (f *FunctionLiteral) expressionNode() {}
+
+// TokenLiteral returns the actual value of the function literal
+func (f *FunctionLiteral) TokenLiteral() string {
+	return f.Token.Literal
+}
+
+// String returns a string representation of a FunctionLiteral node
+func (f *FunctionLiteral) String() string {
+	var out bytes.Buffer
+
+	params := []string{}
+
+	for _, param := range f.Parameters {
+		params = append(params, param.String())
+	}
+
+	out.WriteString(f.TokenLiteral())
+
+	out.WriteString("(")
+
+	out.WriteString(strings.Join(params, ", "))
+
+	out.WriteString(") ")
+
+	out.WriteString(f.Body.String())
+
 	return out.String()
 }

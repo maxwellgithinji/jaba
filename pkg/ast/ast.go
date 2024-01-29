@@ -431,3 +431,45 @@ func (f *FunctionLiteral) String() string {
 
 	return out.String()
 }
+
+// CallExpression represents a structure to support function calls that also may include parameters
+// It fulfils the Expression interface by implementing expressionNode() method
+// It by extension fulfills the Node interface which is part of the Expression interface
+// by implementing TokenLiteral() and String() methods from the Node interface
+type CallExpression struct {
+	// Token represents the ( token which is after the function name
+	Token token.Token
+
+	// Function represents an identifier or function literal
+	Function Expression
+
+	// Arguments represents the parameters of the function
+	Arguments []Expression
+}
+
+// expressionNode method constructs an expression node in the Abstract Syntax Tree (AST) from the call expression
+func (c *CallExpression) expressionNode() {}
+
+// TokenLiteral returns the actual value of the call expression
+func (c *CallExpression) TokenLiteral() string {
+	return c.Token.Literal
+}
+
+// String returns a string representation of a CallExpression node
+func (c *CallExpression) String() string {
+	var out bytes.Buffer
+
+	args := []string{}
+
+	for _, arg := range c.Arguments {
+		args = append(args, arg.String())
+	}
+
+	out.WriteString(c.Function.String())
+
+	out.WriteString("(")
+	out.WriteString(strings.Join(args, ", "))
+	out.WriteString(")")
+
+	return out.String()
+}

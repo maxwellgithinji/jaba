@@ -61,6 +61,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.MINUS, p.parseInfixExpression)
 	p.registerInfix(token.SLASH, p.parseInfixExpression)
 	p.registerInfix(token.ASTERISK, p.parseInfixExpression)
+	p.registerInfix(token.LPAREN, p.parseCallExpression)
 
 	p.nextToken()
 	p.nextToken()
@@ -218,6 +219,19 @@ const (
 	CALL
 )
 
+// precedences is a hashmap containing infix operator tokens mapped to respective precedence values
+var precedences = map[token.TokenType]int{
+	token.EQ:       EQUALS,
+	token.NEQ:      EQUALS,
+	token.LT:       LESSGREATER,
+	token.GT:       LESSGREATER,
+	token.PLUS:     SUM,
+	token.MINUS:    SUM,
+	token.SLASH:    PRODUCT,
+	token.ASTERISK: PRODUCT,
+	token.LPAREN:   CALL,
+}
+
 // registerPrefix records a prefix token
 func (p *Parser) registerPrefix(tokenType token.TokenType, fn prefixParseFn) {
 	p.prefixParseFns[tokenType] = fn
@@ -327,18 +341,6 @@ func (p *Parser) parsePrefixExpression() ast.Expression {
 	expression.Right = p.parseExpression(PREFIX)
 
 	return expression
-}
-
-// precedences is a hashmap containing infix operator tokens mapped to respective precedence values
-var precedences = map[token.TokenType]int{
-	token.EQ:       EQUALS,
-	token.NEQ:      EQUALS,
-	token.LT:       LESSGREATER,
-	token.GT:       LESSGREATER,
-	token.PLUS:     SUM,
-	token.MINUS:    SUM,
-	token.SLASH:    PRODUCT,
-	token.ASTERISK: PRODUCT,
 }
 
 // peekPrecedence returns the precedence associated with the peek token
@@ -508,4 +510,42 @@ func (p *Parser) parseFunctionParameters() []*ast.Identifier {
 	}
 
 	return identifiers
+}
+
+// parseCallExpression returns a node that represents the function call expression
+func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
+	expression := &ast.CallExpression{Token: p.currentToken, Function: function}
+
+	expression.Arguments = p.parseCallArguments()
+
+	return expression
+}
+
+// parseCallArguments is a helper function that parses the arguments of a function call
+func (p *Parser) parseCallArguments() []ast.Expression {
+	arguments := []ast.Expression{}
+
+	// allow empty arguments
+	if p.peekTokenIs(token.RPAREN) {
+		p.nextToken()
+		return arguments
+	}
+
+	p.nextToken()
+
+	arguments = append(arguments, p.parseExpression(LOWEST))
+
+	// parse function parameters
+	for p.peekTokenIs(token.COMMA) {
+		p.nextToken()
+		p.nextToken()
+
+		arguments = append(arguments, p.parseExpression(LOWEST))
+	}
+
+	if !p.expectPeek(token.RPAREN) {
+		return nil
+	}
+
+	return arguments
 }

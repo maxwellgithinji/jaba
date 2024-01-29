@@ -8,18 +8,18 @@ import (
 	"github.com/maxwellgithinji/jaba/pkg/lexer"
 )
 
-// TODO: add support for semicolons
-
 func TestLetStatement(t *testing.T) {
 	tests := []struct {
 		input              string
 		expectedIdentifier string
 		expectedValue      interface{}
 	}{
-		{"let x = 1", "x", 1},
-		{"let y = 12", "y", 12},
-		{"let foo = 123", "foo", 123},
-		{"let bar = 1", "bar", 1},
+		{"let x = 1;", "x", 1},
+		{"let y = 12;", "y", 12},
+		{"let foo = 123;", "foo", 123},
+		{"let bar = 1;", "bar", 1},
+		{"let z = true;", "z", true},
+		{"let foobar = y;", "foobar", "y"},
 	}
 
 	for _, tt := range tests {
@@ -50,9 +50,11 @@ func TestReturnStatements(t *testing.T) {
 		input         string
 		expectedValue interface{}
 	}{
-		{"return 1", 1},
-		{"return 10", 10},
-		{"return 9992919921", 9992919921},
+		{"return 1;", 1},
+		{"return 10;", 10},
+		{"return 9992919921;", 9992919921},
+		{"return true;", true},
+		{"return foobar;", "foobar"},
 	}
 
 	for _, tt := range tests {

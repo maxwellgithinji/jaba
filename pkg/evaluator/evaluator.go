@@ -62,15 +62,18 @@ func nativeBooleanToBooleanObject(input bool) object.Object {
 func evalPrefixExpression(operator string, right object.Object) object.Object {
 	switch operator {
 	case "!":
-		return evalNopeOperatorExpression(right)
+		return evalNopePrefixOperatorExpression(right)
+
+	case "-":
+		return evalMinusPrefixOperatorExpression(right)
 
 	}
 	return nil
 }
 
-// evalNopeOperatorExpression is a helper function that evaluates a nope operator expression, and returns an object representation as output
+// evalNopeOperatorExpression is a helper function that evaluates a nope operator that appears at the beginning of the expression
 // TODO:  should be an error handler instead
-func evalNopeOperatorExpression(right object.Object) object.Object {
+func evalNopePrefixOperatorExpression(right object.Object) object.Object {
 	switch right {
 	case TRUE:
 		return FALSE
@@ -84,4 +87,16 @@ func evalNopeOperatorExpression(right object.Object) object.Object {
 	default:
 		return FALSE
 	}
+}
+
+// evalMinusPrefixOperatorExpression is a helper function that evaluates a minus operator that appears at the beginning of the expression
+// minus prefix only applies to numbers
+func evalMinusPrefixOperatorExpression(right object.Object) object.Object {
+	if right.Type() != object.INTEGER_OBJECT {
+		return NULL
+	}
+
+	value := right.(*object.Integer).Value
+
+	return &object.Integer{Value: -value}
 }

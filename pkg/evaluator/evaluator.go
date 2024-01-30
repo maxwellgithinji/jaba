@@ -34,6 +34,11 @@ func Eval(node ast.Node) object.Object {
 	case *ast.PrefixExpression:
 		right := Eval(node.Right) // evaluates expression on the right hand side of the operator
 		return evalPrefixExpression(node.Operator, right)
+
+	case *ast.InfixExpression:
+		left := Eval(node.Left)   // evaluates expression on the left hand side of the operator
+		right := Eval(node.Right) // evaluates expression on the right hand side of the operator
+		return evalInfixExpression(node.Operator, left, right)
 	}
 
 	return nil
@@ -99,4 +104,37 @@ func evalMinusPrefixOperatorExpression(right object.Object) object.Object {
 	value := right.(*object.Integer).Value
 
 	return &object.Integer{Value: -value}
+}
+
+// evalInfixExpression evaluates an expression that have operands in between themselves
+func evalInfixExpression(operator string, left object.Object, right object.Object) object.Object {
+
+	switch {
+	case left.Type() == object.INTEGER_OBJECT && right.Type() == object.INTEGER_OBJECT: // integer based infix expression
+		return evalIntegerInfixExpression(operator, left, right)
+
+	}
+	return nil
+}
+
+// evalIntegerInfixExpression evaluated integer based infix expression
+func evalIntegerInfixExpression(operator string, left object.Object, right object.Object) object.Object {
+	leftValue := left.(*object.Integer).Value
+	rightValue := right.(*object.Integer).Value
+	switch operator {
+	case "+":
+		return &object.Integer{Value: leftValue + rightValue}
+
+	case "-":
+		return &object.Integer{Value: leftValue - rightValue}
+
+	case "*":
+		return &object.Integer{Value: leftValue * rightValue}
+
+	case "/":
+		return &object.Integer{Value: leftValue / rightValue}
+
+	default:
+		return NULL
+	}
 }

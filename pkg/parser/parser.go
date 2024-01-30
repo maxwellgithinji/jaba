@@ -242,8 +242,8 @@ func (p *Parser) registerInfix(tokenType token.TokenType, fn infixParseFn) {
 
 // parseExpressionStatement creates the AST representation of an expression statement
 func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
-	// Visualizes parseExpressionStatement
-	defer untrace(trace("parseExpressionStatement"))
+	// Uncomment to visualizes parseExpressionStatement
+	// defer untrace(trace("parseExpressionStatement"))
 
 	statement := &ast.ExpressionStatement{Token: p.currentToken}
 
@@ -260,8 +260,8 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 
 // parseExpression is a helper function to parse supported expressions
 func (p *Parser) parseExpression(precedence int) ast.Expression {
-	// Visualizes parseExpression
-	defer untrace(trace("parseExpression"))
+	// Uncomment to visualizes parseExpression
+	// defer untrace(trace("parseExpression"))
 
 	prefix := p.prefixParseFns[p.currentToken.Type]
 
@@ -304,8 +304,8 @@ func (p *Parser) parseIdentifier() ast.Expression {
 // parseIntegerLiteral returns a representation of an integer literal which contains the token and value in int64 format
 // Note: we can return ast.IntegerLiteral struct since it fulfills ast.Expression interface by implementing its methods
 func (p *Parser) parseIntegerLiteral() ast.Expression {
-	// Visualizes parseIntegerLiteral
-	defer untrace(trace("parseIntegerLiteral"))
+	// Uncomment to visualizes parseIntegerLiteral
+	// defer untrace(trace("parseIntegerLiteral"))
 
 	literal := &ast.IntegerLiteral{Token: p.currentToken}
 	value, err := strconv.ParseInt(p.currentToken.Literal, 10, 64)
@@ -323,8 +323,8 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 // parsePrefixExpression returns a representation of a prefix expression which contains an expression on the left and right side
 // Note: we can return ast.IntegerLiteral struct since it fulfills ast.Expression interface by implementing its methods
 func (p *Parser) parsePrefixExpression() ast.Expression {
-	// Visualizes parsePrefixExpression
-	defer untrace(trace("parsePrefixExpression"))
+	// Uncomment to visualizes parsePrefixExpression
+	// defer untrace(trace("parsePrefixExpression"))
 
 	// left side
 	expression := &ast.PrefixExpression{
@@ -364,8 +364,8 @@ func (p *Parser) currentPrecedence() int {
 // parseInfixExpression returns a representation of an infix operator that contains the left expression, operator and right expression
 // Note: we can return ast.InfixExpression struct since it fulfills ast.Expression interface by implementing its methods
 func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
-	// Visualizes parseInfixExpression
-	defer untrace(trace("parseInfixExpression"))
+	// Uncomment to visualizes parseInfixExpression
+	// defer untrace(trace("parseInfixExpression"))
 
 	expression := &ast.InfixExpression{
 		Token:    p.currentToken,

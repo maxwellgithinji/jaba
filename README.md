@@ -1,12 +1,12 @@
 [![wakatime](https://wakatime.com/badge/user/5af887ac-99ff-4b74-9e6a-34c9b421a9d6/project/018d23bd-78d1-4d92-baae-d1019d0fef51.svg)](https://wakatime.com/badge/user/5af887ac-99ff-4b74-9e6a-34c9b421a9d6/project/018d23bd-78d1-4d92-baae-d1019d0fef51)
 
 # jaba
-jaba is a programming language built using golang. The language source code is transformed into tokens through lexical analysis and then tokens are transformed to an Abstract Syntax Tree using a parser
+jaba is a programming language built using golang. The language source code is transformed into tokens through lexical analysis and then tokens are transformed to an Abstract Syntax Tree using a parser. Evaluation (Interpretation) is done to give the AST meaning and returns the respective result of the source code entered.
 
-Source Code -> Tokens -> Abstract Syntax tree (AST)
+Source Code -> Tokens -> Abstract Syntax tree (AST) -> Output
 
 The first transformation, from source code to tokens, is called “lexical analysis”, or “lexing” for short. It’s done by a lexer (also called tokenizer or scanner – some use one word or the other to denote subtle differences in behaviour). 
-Tokens themselves are small, easily categorizable data structures that are then fed to the parser, which does the second transformation and turns the tokens into an “Abstract Syntax Tree”.
+Tokens themselves are small, easily categorizable data structures that are then fed to the parser, which does the second transformation and turns the tokens into an “Abstract Syntax Tree”. The final step is evaluation where the AST is given meaning by an interpreter which gives the respective result. The interpreter used here is called a `tree walking interpreter`. An object is used for the interpreter; it is not very performant, but it's easy to get started with.
 
 ## Supported Features
 - C-like syntax

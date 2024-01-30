@@ -8,6 +8,11 @@ import (
 	"github.com/maxwellgithinji/jaba/pkg/object"
 )
 
+var (
+	TRUE  = &object.Boolean{Value: true}
+	FALSE = &object.Boolean{Value: false}
+)
+
 // Eval is a recursive function that that evaluates the AST and returns an object representation as output
 func Eval(node ast.Node) object.Object {
 	switch node := node.(type) {
@@ -21,6 +26,9 @@ func Eval(node ast.Node) object.Object {
 	// Expressions
 	case *ast.IntegerLiteral:
 		return &object.Integer{Value: node.Value}
+
+	case *ast.Boolean:
+		return nativeBooleanToBooleanObject(node.Value)
 	}
 
 	return nil
@@ -35,4 +43,12 @@ func evalStatements(statements []ast.Statement) object.Object {
 	}
 
 	return result
+}
+
+// nativeBooleanToBooleanObject is a helper function that converts a native boolean to a boolean object
+func nativeBooleanToBooleanObject(input bool) object.Object {
+	if input {
+		return TRUE
+	}
+	return FALSE
 }

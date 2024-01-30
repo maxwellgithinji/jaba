@@ -113,14 +113,22 @@ func evalInfixExpression(operator string, left object.Object, right object.Objec
 	case left.Type() == object.INTEGER_OBJECT && right.Type() == object.INTEGER_OBJECT: // integer based infix expression
 		return evalIntegerInfixExpression(operator, left, right)
 
+	case operator == "==":
+		return nativeBooleanToBooleanObject(left == right)
+
+	case operator == "!=":
+		return nativeBooleanToBooleanObject(left != right)
+
+	default:
+		return NULL
 	}
-	return nil
 }
 
 // evalIntegerInfixExpression evaluated integer based infix expression
 func evalIntegerInfixExpression(operator string, left object.Object, right object.Object) object.Object {
 	leftValue := left.(*object.Integer).Value
 	rightValue := right.(*object.Integer).Value
+
 	switch operator {
 	case "+":
 		return &object.Integer{Value: leftValue + rightValue}
@@ -133,6 +141,18 @@ func evalIntegerInfixExpression(operator string, left object.Object, right objec
 
 	case "/":
 		return &object.Integer{Value: leftValue / rightValue}
+
+	case "<":
+		return nativeBooleanToBooleanObject(leftValue < rightValue)
+
+	case ">":
+		return nativeBooleanToBooleanObject(leftValue > rightValue)
+
+	case "==":
+		return nativeBooleanToBooleanObject(leftValue == rightValue)
+
+	case "!=":
+		return nativeBooleanToBooleanObject(leftValue != rightValue)
 
 	default:
 		return NULL

@@ -4,6 +4,8 @@
 package evaluator
 
 import (
+	"fmt"
+
 	"github.com/maxwellgithinji/jaba/pkg/ast"
 	"github.com/maxwellgithinji/jaba/pkg/object"
 )
@@ -61,8 +63,13 @@ func evalProgram(statements []ast.Statement) object.Object {
 	for _, statement := range statements {
 		result = Eval(statement)
 
-		if returnValue, ok := result.(*object.ReturnValue); ok {
-			return returnValue.Value
+		switch r := result.(type) {
+
+		case *object.ReturnValue:
+			return r.Value
+
+		case *object.Error:
+			return r
 		}
 	}
 
@@ -76,8 +83,11 @@ func evalBlockStatements(block *ast.BlockStatement) object.Object {
 	for _, statement := range block.Statements {
 		result = Eval(statement)
 
-		if result != nil && result.Type() == object.RETURN_VALUE_OBJECT {
-			return result
+		if result != nil {
+			resultType := result.Type()
+			if resultType == object.RETURN_VALUE_OBJECT || resultType == object.ERROR_OBJECT {
+				return result
+			}
 		}
 	}
 
@@ -102,7 +112,7 @@ func evalPrefixExpression(operator string, right object.Object) object.Object {
 		return evalMinusPrefixOperatorExpression(right)
 
 	}
-	return nil
+	return newError("unknown operation: %s %s", operator, right.Type())
 }
 
 // evalNopeOperatorExpression is a helper function that evaluates a nope operator that appears at the beginning of the expression
@@ -127,7 +137,7 @@ func evalNopePrefixOperatorExpression(right object.Object) object.Object {
 // minus prefix only applies to numbers
 func evalMinusPrefixOperatorExpression(right object.Object) object.Object {
 	if right.Type() != object.INTEGER_OBJECT {
-		return NULL
+		return newError("unknown operation: -%s", right.Type())
 	}
 
 	value := right.(*object.Integer).Value
@@ -148,8 +158,11 @@ func evalInfixExpression(operator string, left object.Object, right object.Objec
 	case operator == "!=":
 		return nativeBooleanToBooleanObject(left != right)
 
+	case left.Type() != right.Type():
+		return newError("type mismatch: %s %s %s", left.Type(), operator, right.Type())
+
 	default:
-		return NULL
+		return newError("unknown operation: %s %s %s", left.Type(), operator, right.Type())
 	}
 }
 
@@ -184,7 +197,7 @@ func evalIntegerInfixExpression(operator string, left object.Object, right objec
 		return nativeBooleanToBooleanObject(leftValue != rightValue)
 
 	default:
-		return NULL
+		return newError("unknown operation %s %s %s", left.Type(), operator, right.Type())
 	}
 }
 
@@ -216,4 +229,10 @@ func isTruthy(object object.Object) bool {
 	default:
 		return true
 	}
+}
+
+// newError returns a meaningful error message to the user of the jaba program when they write unexpected jaba code
+// it uses the standard golang Sprintf to format the error message
+func newError(format string, a ...interface{}) *object.Error {
+	return &object.Error{Message: fmt.Sprintf(format, a...)}
 }

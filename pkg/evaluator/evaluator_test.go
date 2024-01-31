@@ -8,6 +8,49 @@ import (
 	"github.com/maxwellgithinji/jaba/pkg/parser"
 )
 
+func testEval(input string) object.Object {
+	l := lexer.New(input)
+	p := parser.New(l)
+	program := p.ParseProgram()
+	return Eval(program)
+}
+
+func testIntegerObject(t *testing.T, evaluated object.Object, expected int64) bool {
+	result, ok := evaluated.(*object.Integer)
+	if !ok {
+		t.Fatalf("evaluated is not *object.Integer, got: %T", evaluated)
+		return false
+	}
+
+	if result.Value != expected {
+		t.Errorf("result.Value is not %d, got %d", expected, result.Value)
+		return false
+	}
+	return true
+}
+
+func testBooleanObject(t *testing.T, evaluated object.Object, expected bool) bool {
+	result, ok := evaluated.(*object.Boolean)
+	if !ok {
+		t.Fatalf("evaluated is not *object.Boolean, got: %T", evaluated)
+		return false
+	}
+
+	if result.Value != expected {
+		t.Errorf("result.Value is not %t, got %t", expected, result.Value)
+		return false
+	}
+	return true
+}
+
+func testNullObject(t *testing.T, object object.Object) bool {
+	if object != NULL {
+		t.Errorf("object is not NULL, got %T", object)
+		return false
+	}
+	return true
+}
+
 func TestEvalIntegerExpression(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -140,49 +183,6 @@ func TestReturnStatements(t *testing.T) {
 
 		testIntegerObject(t, evaluated, tt.expected)
 	}
-}
-
-func testEval(input string) object.Object {
-	l := lexer.New(input)
-	p := parser.New(l)
-	program := p.ParseProgram()
-	return Eval(program)
-}
-
-func testIntegerObject(t *testing.T, evaluated object.Object, expected int64) bool {
-	result, ok := evaluated.(*object.Integer)
-	if !ok {
-		t.Fatalf("evaluated is not *object.Integer, got: %T", evaluated)
-		return false
-	}
-
-	if result.Value != expected {
-		t.Errorf("result.Value is not %d, got %d", expected, result.Value)
-		return false
-	}
-	return true
-}
-
-func testBooleanObject(t *testing.T, evaluated object.Object, expected bool) bool {
-	result, ok := evaluated.(*object.Boolean)
-	if !ok {
-		t.Fatalf("evaluated is not *object.Boolean, got: %T", evaluated)
-		return false
-	}
-
-	if result.Value != expected {
-		t.Errorf("result.Value is not %t, got %t", expected, result.Value)
-		return false
-	}
-	return true
-}
-
-func testNullObject(t *testing.T, object object.Object) bool {
-	if object != NULL {
-		t.Errorf("object is not NULL, got %T", object)
-		return false
-	}
-	return true
 }
 
 func TestErrorHandling(t *testing.T) {

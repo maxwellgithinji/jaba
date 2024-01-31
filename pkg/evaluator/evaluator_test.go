@@ -184,3 +184,59 @@ func testNullObject(t *testing.T, object object.Object) bool {
 	}
 	return true
 }
+
+func TestErrorHandling(t *testing.T) {
+	test := []struct {
+		input    string
+		expected string
+	}{
+		{
+			"5 + true;",
+			"type mismatch: INTEGER + BOOLEAN",
+		},
+		{
+			"5 + true; 5;",
+			"type mismatch: INTEGER + BOOLEAN",
+		},
+		{
+			"-true;",
+			"unknown operation: -BOOLEAN",
+		},
+		{
+			"true + false;",
+			"unknown operation: BOOLEAN + BOOLEAN",
+		},
+		{
+			"5; true + false; 5;",
+			"unknown operation: BOOLEAN + BOOLEAN",
+		},
+		{
+			"if (10 > 1) {true + false}",
+			"unknown operation: BOOLEAN + BOOLEAN",
+		},
+		{
+			`
+			if (10 > 1) {
+				if (10 > 1){
+                    return true + false;
+                }
+                return 1;
+			}
+			`,
+			"unknown operation: BOOLEAN + BOOLEAN",
+		},
+	}
+
+	for _, tt := range test {
+		evaluated := testEval(tt.input)
+
+		errorObject, ok := evaluated.(*object.Error)
+		if !ok {
+			t.Fatalf("evaluated is not *object.Error, got: %T(%+v)", evaluated, evaluated)
+			continue
+		}
+		if errorObject.Message != tt.expected {
+			t.Errorf("errorObject.Message is not %s, got %s", tt.expected, errorObject.Message)
+		}
+	}
+}

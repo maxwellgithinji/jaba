@@ -1,3 +1,4 @@
+![Gollang workflow](https://github.com/maxwellgithinji/jaba/actions/workflows/go.yml/badge.svg) 
 [![wakatime](https://wakatime.com/badge/user/5af887ac-99ff-4b74-9e6a-34c9b421a9d6/project/018d23bd-78d1-4d92-baae-d1019d0fef51.svg)](https://wakatime.com/badge/user/5af887ac-99ff-4b74-9e6a-34c9b421a9d6/project/018d23bd-78d1-4d92-baae-d1019d0fef51)
 
 # jaba

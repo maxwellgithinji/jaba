@@ -15,6 +15,7 @@ const (
 	BOOLEAN_OBJECT      = "BOOLEAN"
 	NULL_OBJECT         = "NULL"
 	RETURN_VALUE_OBJECT = "RETURN_VALUE"
+	ERROR_OBJECT        = "ERROR"
 )
 
 // Object is an interface that helps represent the values encountered when evaluating the jaba program
@@ -88,4 +89,20 @@ func (r *ReturnValue) Type() ObjectType {
 // Inspect returns the representation of the object value, return value
 func (r *ReturnValue) Inspect() string {
 	return r.Value.Inspect()
+}
+
+// Error represents internal jaba error
+// it fulfills the Object interface by implementing the Type() and Inspect() methods
+type Error struct {
+	Message string
+}
+
+// Type returns the type of the object, error
+func (e *Error) Type() ObjectType {
+	return ERROR_OBJECT
+}
+
+// Inspect returns the string representation of the object value, error
+func (e *Error) Inspect() string {
+	return "ERROR: " + e.Message
 }

@@ -31,6 +31,9 @@ func Eval(node ast.Node) object.Object {
 
 	case *ast.ReturnStatement:
 		value := Eval(node.Value)
+		if isError(value) {
+			return value
+		}
 		return &object.ReturnValue{Value: value}
 
 	// Expressions
@@ -42,11 +45,20 @@ func Eval(node ast.Node) object.Object {
 
 	case *ast.PrefixExpression:
 		right := Eval(node.Right) // evaluates expression on the right hand side of the operator
+		if isError(right) {
+			return right
+		}
 		return evalPrefixExpression(node.Operator, right)
 
 	case *ast.InfixExpression:
-		left := Eval(node.Left)   // evaluates expression on the left hand side of the operator
+		left := Eval(node.Left) // evaluates expression on the left hand side of the operator
+		if isError(left) {
+			return left
+		}
 		right := Eval(node.Right) // evaluates expression on the right hand side of the operator
+		if isError(right) {
+			return right
+		}
 		return evalInfixExpression(node.Operator, left, right)
 
 	case *ast.IfExpression:
@@ -204,6 +216,9 @@ func evalIntegerInfixExpression(operator string, left object.Object, right objec
 // evalIfExpression an evaluated result of the if expression
 func evalIfExpression(i *ast.IfExpression) object.Object {
 	condition := Eval(i.Condition)
+	if isError(condition) {
+		return condition
+	}
 
 	if isTruthy(condition) {
 		return Eval(i.Consequence)
@@ -235,4 +250,12 @@ func isTruthy(object object.Object) bool {
 // it uses the standard golang Sprintf to format the error message
 func newError(format string, a ...interface{}) *object.Error {
 	return &object.Error{Message: fmt.Sprintf(format, a...)}
+}
+
+// isError is a helper function that helps check error early and allows them not to stray far away from their origin
+func isError(obj object.Object) bool {
+	if obj != nil {
+		return obj.Type() == object.ERROR_OBJECT
+	}
+	return false
 }

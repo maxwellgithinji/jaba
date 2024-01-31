@@ -19,13 +19,13 @@ func Eval(node ast.Node) object.Object {
 	switch node := node.(type) {
 	// Statements
 	case *ast.Program:
-		return evalStatements(node.Statements)
+		return evalProgram(node.Statements)
 
 	case *ast.ExpressionStatement:
 		return Eval(node.Value)
 
 	case *ast.BlockStatement:
-		return evalStatements(node.Statements)
+		return evalBlockStatements(node)
 
 	case *ast.ReturnStatement:
 		value := Eval(node.Value)
@@ -54,8 +54,8 @@ func Eval(node ast.Node) object.Object {
 	return nil
 }
 
-// evalStatements is a helper function that a list of AST statements and returns an object representation as output
-func evalStatements(statements []ast.Statement) object.Object {
+// evalProgram evaluates the entry point of the program
+func evalProgram(statements []ast.Statement) object.Object {
 	var result object.Object
 
 	for _, statement := range statements {
@@ -63,6 +63,21 @@ func evalStatements(statements []ast.Statement) object.Object {
 
 		if returnValue, ok := result.(*object.ReturnValue); ok {
 			return returnValue.Value
+		}
+	}
+
+	return result
+}
+
+// evalBlockStatements is a helper function that evaluates a list of AST block statements and returns an object representation as output
+func evalBlockStatements(block *ast.BlockStatement) object.Object {
+	var result object.Object
+
+	for _, statement := range block.Statements {
+		result = Eval(statement)
+
+		if result != nil && result.Type() == object.RETURN_VALUE_OBJECT {
+			return result
 		}
 	}
 

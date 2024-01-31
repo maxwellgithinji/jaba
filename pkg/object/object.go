@@ -11,9 +11,10 @@ import "fmt"
 type ObjectType string
 
 const (
-	INTEGER_OBJECT = "INTEGER"
-	BOOLEAN_OBJECT = "BOOLEAN"
-	NULL_OBJECT    = "NULL"
+	INTEGER_OBJECT      = "INTEGER"
+	BOOLEAN_OBJECT      = "BOOLEAN"
+	NULL_OBJECT         = "NULL"
+	RETURN_VALUE_OBJECT = "RETURN_VALUE"
 )
 
 // Object is an interface that helps represent the values encountered when evaluating the jaba program
@@ -71,4 +72,20 @@ func (n *Null) Type() ObjectType {
 // Inspect returns the string representation of the object value, null
 func (n *Null) Inspect() string {
 	return "null"
+}
+
+// ReturnValue represents a jaba return value
+// It fulfills the object interface by implementing the Type() and Inspect() methods
+type ReturnValue struct {
+	Value Object
+}
+
+// Type returns the type of the object
+func (r *ReturnValue) Type() ObjectType {
+	return RETURN_VALUE_OBJECT
+}
+
+// Inspect returns the representation of the object value, return value
+func (r *ReturnValue) Inspect() string {
+	return r.Value.Inspect()
 }

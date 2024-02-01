@@ -17,24 +17,31 @@ var (
 )
 
 // Eval is a recursive function that that evaluates the AST and returns an object representation as output
-func Eval(node ast.Node) object.Object {
+func Eval(node ast.Node, env *object.Environment) object.Object {
 	switch node := node.(type) {
 	// Statements
 	case *ast.Program:
-		return evalProgram(node.Statements)
+		return evalProgram(node.Statements, env)
 
 	case *ast.ExpressionStatement:
-		return Eval(node.Value)
+		return Eval(node.Value, env)
 
 	case *ast.BlockStatement:
-		return evalBlockStatements(node)
+		return evalBlockStatements(node, env)
 
 	case *ast.ReturnStatement:
-		value := Eval(node.Value)
+		value := Eval(node.Value, env)
 		if isError(value) {
 			return value
 		}
 		return &object.ReturnValue{Value: value}
+
+	case *ast.LetStatement:
+		value := Eval(node.Value, env)
+		if isError(value) {
+			return value
+		}
+		env.Set(node.Name.Value, value)
 
 	// Expressions
 	case *ast.IntegerLiteral:
@@ -44,36 +51,40 @@ func Eval(node ast.Node) object.Object {
 		return nativeBooleanToBooleanObject(node.Value)
 
 	case *ast.PrefixExpression:
-		right := Eval(node.Right) // evaluates expression on the right hand side of the operator
+		right := Eval(node.Right, env) // evaluates expression on the right hand side of the operator
 		if isError(right) {
 			return right
 		}
 		return evalPrefixExpression(node.Operator, right)
 
 	case *ast.InfixExpression:
-		left := Eval(node.Left) // evaluates expression on the left hand side of the operator
+		left := Eval(node.Left, env) // evaluates expression on the left hand side of the operator
 		if isError(left) {
 			return left
 		}
-		right := Eval(node.Right) // evaluates expression on the right hand side of the operator
+		right := Eval(node.Right, env) // evaluates expression on the right hand side of the operator
 		if isError(right) {
 			return right
 		}
 		return evalInfixExpression(node.Operator, left, right)
 
 	case *ast.IfExpression:
-		return evalIfExpression(node)
+		return evalIfExpression(node, env)
+
+	// Identifier
+	case *ast.Identifier:
+		return evalIdentifier(node, env)
 	}
 
 	return nil
 }
 
 // evalProgram evaluates the entry point of the program
-func evalProgram(statements []ast.Statement) object.Object {
+func evalProgram(statements []ast.Statement, env *object.Environment) object.Object {
 	var result object.Object
 
 	for _, statement := range statements {
-		result = Eval(statement)
+		result = Eval(statement, env)
 
 		switch r := result.(type) {
 
@@ -89,11 +100,11 @@ func evalProgram(statements []ast.Statement) object.Object {
 }
 
 // evalBlockStatements is a helper function that evaluates a list of AST block statements and returns an object representation as output
-func evalBlockStatements(block *ast.BlockStatement) object.Object {
+func evalBlockStatements(block *ast.BlockStatement, env *object.Environment) object.Object {
 	var result object.Object
 
 	for _, statement := range block.Statements {
-		result = Eval(statement)
+		result = Eval(statement, env)
 
 		if result != nil {
 			resultType := result.Type()
@@ -128,7 +139,6 @@ func evalPrefixExpression(operator string, right object.Object) object.Object {
 }
 
 // evalNopeOperatorExpression is a helper function that evaluates a nope operator that appears at the beginning of the expression
-// TODO:  should be an error handler instead
 func evalNopePrefixOperatorExpression(right object.Object) object.Object {
 	switch right {
 	case TRUE:
@@ -178,7 +188,7 @@ func evalInfixExpression(operator string, left object.Object, right object.Objec
 	}
 }
 
-// evalIntegerInfixExpression evaluated integer based infix expression
+// evalIntegerInfixExpression returns evaluated integer based infix expression
 func evalIntegerInfixExpression(operator string, left object.Object, right object.Object) object.Object {
 	leftValue := left.(*object.Integer).Value
 	rightValue := right.(*object.Integer).Value
@@ -213,17 +223,17 @@ func evalIntegerInfixExpression(operator string, left object.Object, right objec
 	}
 }
 
-// evalIfExpression an evaluated result of the if expression
-func evalIfExpression(i *ast.IfExpression) object.Object {
-	condition := Eval(i.Condition)
+// evalIfExpression returns an evaluated result of the if expression
+func evalIfExpression(i *ast.IfExpression, env *object.Environment) object.Object {
+	condition := Eval(i.Condition, env)
 	if isError(condition) {
 		return condition
 	}
 
 	if isTruthy(condition) {
-		return Eval(i.Consequence)
+		return Eval(i.Consequence, env)
 	} else if i.Alternative != nil {
-		return Eval(i.Alternative)
+		return Eval(i.Alternative, env)
 	} else {
 		return NULL
 	}
@@ -258,4 +268,13 @@ func isError(obj object.Object) bool {
 		return obj.Type() == object.ERROR_OBJECT
 	}
 	return false
+}
+
+// evalIdentifier uses the environment to get the identifier object otherwise returns an error
+func evalIdentifier(node *ast.Identifier, env *object.Environment) object.Object {
+	key, ok := env.Get(node.Value)
+	if !ok {
+		return newError("identifier not found: %s", node.Value)
+	}
+	return key
 }

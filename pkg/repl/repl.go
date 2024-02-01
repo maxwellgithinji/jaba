@@ -12,6 +12,7 @@ import (
 
 	"github.com/maxwellgithinji/jaba/pkg/evaluator"
 	"github.com/maxwellgithinji/jaba/pkg/lexer"
+	"github.com/maxwellgithinji/jaba/pkg/object"
 	"github.com/maxwellgithinji/jaba/pkg/parser"
 )
 
@@ -33,6 +34,7 @@ ____
 // it helps the user code the jaba program on the command line
 func Run(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
+	env := object.NewEnvironment()
 	for {
 		fmt.Fprint(out, Prompt)
 		scanned := scanner.Scan()
@@ -52,7 +54,7 @@ func Run(in io.Reader, out io.Writer) {
 			continue
 		}
 
-		evaluated := evaluator.Eval(program)
+		evaluated := evaluator.Eval(program, env)
 
 		if evaluated != nil {
 			io.WriteString(out, evaluated.Inspect())

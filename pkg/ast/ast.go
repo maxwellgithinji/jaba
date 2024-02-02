@@ -473,3 +473,28 @@ func (c *CallExpression) String() string {
 
 	return out.String()
 }
+
+// StringLiteral returns a string representation of a STRING data type as a node
+// It fulfils the Expression interface by implementing expressionNode() method
+// It by extension fulfills the Node interface which is part of the Expression interface
+// by implementing TokenLiteral() and String() methods from the Node interface
+type StringLiteral struct {
+	// Token represents the string token
+	Token token.Token
+
+	// Value represents the actual value of the string
+	Value string
+}
+
+// expressionNode method constructs an expression node in the Abstract Syntax Tree (AST) from the string literal
+func (s *StringLiteral) expressionNode() {}
+
+// TokenLiteral returns the actual value of the string literal
+func (s *StringLiteral) TokenLiteral() string {
+	return s.Token.Literal
+}
+
+// String returns a string representation of a StringLiteral node
+func (s *StringLiteral) String() string {
+	return s.Token.Literal
+}

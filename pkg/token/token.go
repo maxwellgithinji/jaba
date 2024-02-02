@@ -114,6 +114,9 @@ const (
 
 	// RETURN represents the keyword return. it is used to return a value from a function.
 	RETURN TokenType = "RETURN"
+
+	// STRING represents the string datatype. a string is anything enclosed in quotes
+	STRING TokenType = "STRING"
 )
 
 // keywords defines the language reserves characters that cannot be used as identifiers.

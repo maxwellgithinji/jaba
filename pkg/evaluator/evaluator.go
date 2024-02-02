@@ -76,6 +76,19 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		body := node.Body
 		return &object.Function{Parameters: params, Env: env, Body: body}
 
+	case *ast.CallExpression:
+		function := Eval(node.Function, env)
+
+		if isError(function) {
+			return function
+		}
+
+		args := evalExpressions(node.Arguments, env)
+		if len(args) == 1 && isError(args[0]) {
+			return args[0]
+		}
+		return applyFunctions(function, args)
+
 	// Identifier
 	case *ast.Identifier:
 		return evalIdentifier(node, env)
@@ -282,4 +295,56 @@ func evalIdentifier(node *ast.Identifier, env *object.Environment) object.Object
 		return newError("identifier not found: %s", node.Value)
 	}
 	return key
+}
+
+// evalExpressions is a helper function that helps evaluate a list of expressions
+// the expressions are evaluated from left to right
+func evalExpressions(expressions []ast.Expression, env *object.Environment) []object.Object {
+	var evaluated []object.Object
+
+	for _, expression := range expressions {
+		result := Eval(expression, env)
+		if isError(result) {
+			return []object.Object{result}
+		}
+		evaluated = append(evaluated, result)
+	}
+
+	return evaluated
+}
+
+// applyFunctions is a helper function that helps evaluate a function considering its scope
+// it supports higher order functions (functions that return other functions or pass them as arguments)
+// and closures (function that close over the environment they were defined in).
+func applyFunctions(fn object.Object, args []object.Object) object.Object {
+	function, ok := fn.(*object.Function)
+	if !ok {
+		return newError("not a function: %s", fn.Type())
+	}
+
+	extendedEnv := extendFunctionEnv(function, args)
+
+	evaluated := Eval(function.Body, extendedEnv)
+
+	return unwrapReturnValue(evaluated)
+}
+
+// extendFunctionEnv is a helper function that helps extend the environment of a function
+// by scoping the function environment in an enclosed hash
+func extendFunctionEnv(fn *object.Function, args []object.Object) *object.Environment {
+	env := object.NewEnclosedEnvironment(fn.Env)
+
+	for i, param := range fn.Parameters {
+		env.Set(param.Value, args[i])
+	}
+
+	return env
+}
+
+// unwrapReturnValue is a helper function that helps give the value the function returns after executing
+func unwrapReturnValue(result object.Object) object.Object {
+	if returnValue, ok := result.(*object.ReturnValue); ok {
+		return returnValue.Value
+	}
+	return result
 }

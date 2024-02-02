@@ -9,18 +9,38 @@ package object
 type Environment struct {
 	// store is the hashmap that stores the objects
 	store map[string]Object
+
+	// outer helps with scoping of the environment.
+	// its helpful when separating program and function variables
+	outer *Environment
 }
 
 // NewEnvironment creates a new instance of the environment
 func NewEnvironment() *Environment {
 	s := make(map[string]Object)
 
-	return &Environment{store: s}
+	return &Environment{store: s, outer: nil}
+}
+
+// NewEnclosedEnvironment creates a new instance of an scoped environment
+// it extends the Environment instance to cater for enclosed environments
+func NewEnclosedEnvironment(outer *Environment) *Environment {
+	env := NewEnvironment()
+
+	env.outer = outer
+
+	return env
 }
 
 // Get returns the object associated with the given key from the environment
+// it also checks for values both in the inner and outer scopes
 func (e *Environment) Get(key string) (Object, bool) {
 	obj, ok := e.store[key]
+
+	if !ok && e.outer != nil {
+		obj, ok = e.outer.Get(key)
+	}
+
 	return obj, ok
 }
 

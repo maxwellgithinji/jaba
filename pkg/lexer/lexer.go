@@ -137,6 +137,10 @@ func (l *Lexer) NextToken() token.Token {
 		tok.Literal = "" // EOF literal is an empty string
 		tok = newToken(token.EOF, l.ch)
 
+	case '"':
+		tok.Type = token.STRING
+		tok.Literal = l.readString()
+
 	default:
 		if isLetter(l.ch) {
 			tok.Literal = l.readIdentifier()
@@ -213,4 +217,18 @@ func (l *Lexer) peekChar() byte {
 	} else {
 		return l.input[l.readPosition]
 	}
+}
+
+// readString loops until it encounters a closing quote or the end of the input and returns the string enclosed by the quotes
+func (l *Lexer) readString() string {
+	position := l.position + 1
+
+	for {
+		l.readChar()
+		if l.ch == '"' || l.ch == 0 {
+			break
+		}
+	}
+
+	return l.input[position:l.position]
 }

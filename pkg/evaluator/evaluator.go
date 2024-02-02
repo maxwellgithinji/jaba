@@ -89,6 +89,9 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		}
 		return applyFunctions(function, args)
 
+	case *ast.StringLiteral:
+		return &object.String{Value: node.Value}
+
 	// Identifier
 	case *ast.Identifier:
 		return evalIdentifier(node, env)

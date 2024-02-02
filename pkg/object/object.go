@@ -23,6 +23,7 @@ const (
 	RETURN_VALUE_OBJECT = "RETURN_VALUE"
 	ERROR_OBJECT        = "ERROR"
 	FUNCTION_OBJECT     = "FUNCTION_OBJECT"
+	STRING_OBJECT       = "STRING_OBJECT"
 )
 
 // Object is an interface that helps represent the values encountered when evaluating the jaba program
@@ -150,4 +151,21 @@ func (f *Function) Inspect() string {
 	out.WriteString("\n}")
 
 	return out.String()
+}
+
+// String represents a jaba string which is an expression which evaluates to a value
+// it fulfills the Object interface by implementing the Type() and Inspect() methods
+type String struct {
+	// Value is the actual value of the string literal
+	Value string
+}
+
+// Type returns the type of the object, string
+func (s *String) Type() ObjectType {
+	return STRING_OBJECT
+}
+
+// Inspect returns the string representation of the object value, string
+func (s *String) Inspect() string {
+	return s.Value
 }

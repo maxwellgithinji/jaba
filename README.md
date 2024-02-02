@@ -88,9 +88,27 @@ let hello = newGreeter("Hello");
 hello("dear, future Reader!"); // => Hello dear, future Reader!
 ```
 
+## Garbage Collection
+The host language for jaba is Golang, which does the garbage collection and allows the memory not to leak when we run code like this
+```
+let counter = fn(x) {
+  if (x > 100) {
+    return true;
+  } else {
+    let foobar = 9999;
+    counter(x + 1); 
+  }
+}; 
+
+counter(0);
+```
+If C was used to write the interpreter, we would have to implement our own garbage collector to avoid memory leaks. 
+An example of a garbage collector implementation is [Mark and Sweep](https://www.geeksforgeeks.org/mark-and-sweep-garbage-collection-algorithm/).
+
 ## References 
 ### [ Writing An Interpreter In Go](https://interpreterbook.com/)
 - Ball, Thorsten. Writing An Interpreter In Go (p. 8). Kindle Edition.
 - Ball, Thorsten. Writing An Interpreter In Go (pp. 8-9). Kindle Edition.
 - Ball, Thorsten. Writing An Interpreter In Go (p. 9). Kindle Edition.
 - Ball, Thorsten. Writing An Interpreter In Go (p. 13). Kindle Edition. 
+- Ball, Thorsten. Writing An Interpreter In Go (pp. 189-190). Kindle Edition. 

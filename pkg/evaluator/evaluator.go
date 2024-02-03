@@ -296,11 +296,15 @@ func isError(obj object.Object) bool {
 
 // evalIdentifier uses the environment to get the identifier object otherwise returns an error
 func evalIdentifier(node *ast.Identifier, env *object.Environment) object.Object {
-	key, ok := env.Get(node.Value)
-	if !ok {
-		return newError("identifier not found: %s", node.Value)
+	if key, ok := env.Get(node.Value); ok {
+		return key
 	}
-	return key
+
+	if builtin, ok := builtins[node.Value]; ok {
+		return builtin
+	}
+
+	return newError("identifier not found: %s", node.Value)
 }
 
 // evalExpressions is a helper function that helps evaluate a list of expressions
@@ -323,16 +327,21 @@ func evalExpressions(expressions []ast.Expression, env *object.Environment) []ob
 // it supports higher order functions (functions that return other functions or pass them as arguments)
 // and closures (function that close over the environment they were defined in).
 func applyFunctions(fn object.Object, args []object.Object) object.Object {
-	function, ok := fn.(*object.Function)
-	if !ok {
+
+	switch function := fn.(type) {
+
+	case *object.Function:
+		extendedEnv := extendFunctionEnv(function, args)
+		evaluated := Eval(function.Body, extendedEnv)
+		return unwrapReturnValue(evaluated)
+
+	case *object.Builtin:
+		return function.Function(args...)
+
+	default:
 		return newError("not a function: %s", fn.Type())
+
 	}
-
-	extendedEnv := extendFunctionEnv(function, args)
-
-	evaluated := Eval(function.Body, extendedEnv)
-
-	return unwrapReturnValue(evaluated)
 }
 
 // extendFunctionEnv is a helper function that helps extend the environment of a function

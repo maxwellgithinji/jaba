@@ -117,6 +117,12 @@ const (
 
 	// STRING represents the string datatype. a string is anything enclosed in quotes
 	STRING TokenType = "STRING"
+
+	// LBRACKET represents the opening square bracket character
+	LBRACKET TokenType = "["
+
+	// RBRACKET represents the closing square bracket character
+	RBRACKET TokenType = "]"
 )
 
 // keywords defines the language reserves characters that cannot be used as identifiers.

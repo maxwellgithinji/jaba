@@ -23,7 +23,7 @@ const (
 	RETURN_VALUE_OBJECT = "RETURN_VALUE"
 	ERROR_OBJECT        = "ERROR"
 	FUNCTION_OBJECT     = "FUNCTION_OBJECT"
-	STRING_OBJECT       = "STRING_OBJECT"
+	STRING_OBJECT       = "STRING"
 )
 
 // Object is an interface that helps represent the values encountered when evaluating the jaba program

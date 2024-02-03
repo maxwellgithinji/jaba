@@ -201,6 +201,9 @@ func evalInfixExpression(operator string, left object.Object, right object.Objec
 	case operator == "!=":
 		return nativeBooleanToBooleanObject(left != right)
 
+	case right.Type() == object.STRING_OBJECT && left.Type() == object.STRING_OBJECT:
+		return evalStringInfixExpression(operator, left, right)
+
 	case left.Type() != right.Type():
 		return newError("type mismatch: %s %s %s", left.Type(), operator, right.Type())
 
@@ -350,4 +353,16 @@ func unwrapReturnValue(result object.Object) object.Object {
 		return returnValue.Value
 	}
 	return result
+}
+
+// evalStringInfixExpression is a helper function that helps evaluate string concatenation
+func evalStringInfixExpression(operator string, left, right object.Object) object.Object {
+	if operator != "+" {
+		return newError("unknown operation: %s %s %s", left.Type(), operator, right.Type())
+	}
+
+	leftValue := left.(*object.String).Value
+	rightValue := right.(*object.String).Value
+
+	return &object.String{Value: leftValue + rightValue}
 }

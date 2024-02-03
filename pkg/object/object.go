@@ -24,6 +24,7 @@ const (
 	ERROR_OBJECT        = "ERROR"
 	FUNCTION_OBJECT     = "FUNCTION_OBJECT"
 	STRING_OBJECT       = "STRING"
+	BUILTIN_OBJECT      = "BUILTIN"
 )
 
 // Object is an interface that helps represent the values encountered when evaluating the jaba program
@@ -168,4 +169,24 @@ func (s *String) Type() ObjectType {
 // Inspect returns the string representation of the object value, string
 func (s *String) Inspect() string {
 	return s.Value
+}
+
+// BuiltinFunction represents a jaba builtin function which is from the host language that allows user to
+// use host language functions
+type BuiltinFunction func(args ...Object) Object
+
+// Builtin is a wrapper around golang function which is the host language
+// it fulfills the Object interface by implementing the Type() and Inspect() methods
+type Builtin struct {
+	Function BuiltinFunction
+}
+
+// Type returns the type of the object, builtin
+func (b *Builtin) Type() ObjectType {
+	return BUILTIN_OBJECT
+}
+
+// Inspect returns the string representation of the object value, builtin
+func (b *Builtin) Inspect() string {
+	return "builtin function"
 }

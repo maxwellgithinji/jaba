@@ -133,13 +133,19 @@ func (l *Lexer) NextToken() token.Token {
 	case '}':
 		tok = newToken(token.RBRACE, l.ch)
 
-	case 0:
-		tok.Literal = "" // EOF literal is an empty string
-		tok = newToken(token.EOF, l.ch)
-
 	case '"':
 		tok.Type = token.STRING
 		tok.Literal = l.readString()
+
+	case '[':
+		tok = newToken(token.LBRACKET, l.ch)
+
+	case ']':
+		tok = newToken(token.RBRACKET, l.ch)
+
+	case 0:
+		tok.Literal = "" // EOF literal is an empty string
+		tok = newToken(token.EOF, l.ch)
 
 	default:
 		if isLetter(l.ch) {

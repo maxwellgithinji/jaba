@@ -64,6 +64,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.SLASH, p.parseInfixExpression)
 	p.registerInfix(token.ASTERISK, p.parseInfixExpression)
 	p.registerInfix(token.LPAREN, p.parseCallExpression)
+	p.registerInfix(token.LBRACKET, p.parseIndexExpression)
 
 	p.nextToken()
 	p.nextToken()
@@ -217,6 +218,9 @@ const (
 
 	// CALL has the value 7. add(x, y)
 	CALL
+
+	// INDEX has the value 8. array[index]
+	INDEX
 )
 
 // precedences is a hashmap containing infix operator tokens mapped to respective precedence values
@@ -230,6 +234,7 @@ var precedences = map[token.TokenType]int{
 	token.SLASH:    PRODUCT,
 	token.ASTERISK: PRODUCT,
 	token.LPAREN:   CALL,
+	token.LBRACKET: INDEX,
 }
 
 // registerPrefix records a prefix token
@@ -562,4 +567,19 @@ func (p *Parser) parseExpressionList(delimiter token.TokenType) []ast.Expression
 	}
 
 	return list
+}
+
+// parseIndexExpression is an infix expression where [ is the infix operator
+func (p *Parser) parseIndexExpression(left ast.Expression) ast.Expression {
+	expression := &ast.IndexExpression{Token: p.currentToken, Left: left}
+
+	p.nextToken()
+
+	expression.Index = p.parseExpression(LOWEST)
+
+	if !p.expectPeek(token.RBRACKET) {
+		return nil
+	}
+
+	return expression
 }

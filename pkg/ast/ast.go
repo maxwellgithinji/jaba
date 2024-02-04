@@ -535,3 +535,39 @@ func (a *ArrayLiteral) String() string {
 
 	return out.String()
 }
+
+// IndexExpression defines the structure that allows accessing of values by index.
+// It fulfils the Expression interface by implementing expressionNode() method
+// It by extension fulfills the Node interface which is part of the Expression interface
+// by implementing TokenLiteral() and String() methods from the Node interface
+type IndexExpression struct {
+	// Token represents the [ token
+	Token token.Token
+
+	// Left represents the expression being accessed
+	Left Expression
+
+	// Index represents the accessor of the left expression
+	Index Expression
+}
+
+// expressionNode method constructs an expression node in the Abstract Syntax Tree (AST) from the index expression
+func (i *IndexExpression) expressionNode() {}
+
+// TokenLiteral returns the actual value of the index expression
+func (i *IndexExpression) TokenLiteral() string {
+	return i.Token.Literal
+}
+
+// String returns a string representation of an IndexExpression node
+func (i *IndexExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("(")
+	out.WriteString(i.Left.String())
+	out.WriteString("[")
+	out.WriteString(i.Index.String())
+	out.WriteString("])")
+
+	return out.String()
+}

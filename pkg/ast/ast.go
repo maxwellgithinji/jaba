@@ -498,3 +498,40 @@ func (s *StringLiteral) TokenLiteral() string {
 func (s *StringLiteral) String() string {
 	return s.Token.Literal
 }
+
+// ArrayLiteral returns an array literal representation which can support any value including functions
+// It fulfils the Expression interface by implementing expressionNode() method
+// It by extension fulfills the Node interface which is part of the Expression interface
+// by implementing TokenLiteral() and String() methods from the Node interface
+type ArrayLiteral struct {
+	// Token represents the [ token
+	Token token.Token
+
+	// Elements represents the items of the array
+	Elements []Expression
+}
+
+// expressionNode method constructs an expression node in the Abstract Syntax Tree (AST) from the array literal
+func (a *ArrayLiteral) expressionNode() {}
+
+// TokenLiteral returns the actual value of the array literal
+func (a *ArrayLiteral) TokenLiteral() string {
+	return a.Token.Literal
+}
+
+// String returns a string representation of an ArrayLiteral node
+func (a *ArrayLiteral) String() string {
+	var out bytes.Buffer
+
+	elements := []string{}
+
+	for _, element := range a.Elements {
+		elements = append(elements, element.String())
+	}
+
+	out.WriteString("[")
+	out.WriteString(strings.Join(elements, ", "))
+	out.WriteString("]")
+
+	return out.String()
+}

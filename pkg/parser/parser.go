@@ -52,6 +52,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.IF, p.parseIfExpression)
 	p.registerPrefix(token.FUNCTION, p.parseFunctionLiteral)
 	p.registerPrefix(token.STRING, p.parseStringLiteral)
+	p.registerPrefix(token.LBRACKET, p.parseArrayLiteral)
 
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
 	p.registerInfix(token.EQ, p.parseInfixExpression)
@@ -515,41 +516,50 @@ func (p *Parser) parseFunctionParameters() []*ast.Identifier {
 func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
 	expression := &ast.CallExpression{Token: p.currentToken, Function: function}
 
-	expression.Arguments = p.parseCallArguments()
+	expression.Arguments = p.parseExpressionList(token.RPAREN)
 
 	return expression
 }
 
-// parseCallArguments is a helper function that parses the arguments of a function call
-func (p *Parser) parseCallArguments() []ast.Expression {
-	arguments := []ast.Expression{}
+// parseStringLiteral returns a string representation of the literal expression node
+func (p *Parser) parseStringLiteral() ast.Expression {
+	return &ast.StringLiteral{Token: p.currentToken, Value: p.currentToken.Literal}
+}
 
-	// allow empty arguments
-	if p.peekTokenIs(token.RPAREN) {
+// parseArrayLiteral returns an array representation of the literal expression node
+func (p *Parser) parseArrayLiteral() ast.Expression {
+	arrayLiteral := &ast.ArrayLiteral{Token: p.currentToken}
+
+	arrayLiteral.Elements = p.parseExpressionList(token.RBRACKET)
+
+	return arrayLiteral
+}
+
+// parseExpressionList parses a list expression which are comma separated
+func (p *Parser) parseExpressionList(delimiter token.TokenType) []ast.Expression {
+	list := []ast.Expression{}
+
+	// allow empty list
+	if p.peekTokenIs(delimiter) {
 		p.nextToken()
-		return arguments
+		return list
 	}
 
 	p.nextToken()
 
-	arguments = append(arguments, p.parseExpression(LOWEST))
+	list = append(list, p.parseExpression(LOWEST))
 
 	// parse function parameters
 	for p.peekTokenIs(token.COMMA) {
 		p.nextToken()
 		p.nextToken()
 
-		arguments = append(arguments, p.parseExpression(LOWEST))
+		list = append(list, p.parseExpression(LOWEST))
 	}
 
-	if !p.expectPeek(token.RPAREN) {
+	if !p.expectPeek(delimiter) {
 		return nil
 	}
 
-	return arguments
-}
-
-// parseStringLiteral returns a string representation of the literal expression node
-func (p *Parser) parseStringLiteral() ast.Expression {
-	return &ast.StringLiteral{Token: p.currentToken, Value: p.currentToken.Literal}
+	return list
 }

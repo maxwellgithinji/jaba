@@ -25,6 +25,7 @@ const (
 	FUNCTION_OBJECT     = "FUNCTION_OBJECT"
 	STRING_OBJECT       = "STRING"
 	BUILTIN_OBJECT      = "BUILTIN"
+	ARRAY_OBJECT        = "ARRAY"
 )
 
 // Object is an interface that helps represent the values encountered when evaluating the jaba program
@@ -189,4 +190,31 @@ func (b *Builtin) Type() ObjectType {
 // Inspect returns the string representation of the object value, builtin
 func (b *Builtin) Inspect() string {
 	return "builtin function"
+}
+
+// Array represents a jaba builtin array of objects
+// it fulfills the Object interface by implementing the Type() and Inspect() methods
+type Array struct {
+	Elements []Object
+}
+
+// Type returns the type of the object, array
+func (a *Array) Type() ObjectType {
+	return ARRAY_OBJECT
+}
+
+// Inspect returns the string representation of the object value, array
+func (a *Array) Inspect() string {
+	var out bytes.Buffer
+
+	elements := []string{}
+	for _, element := range a.Elements {
+		elements = append(elements, element.Inspect())
+	}
+
+	out.WriteString("[")
+	out.WriteString(strings.Join(elements, ", "))
+	out.WriteString("]")
+
+	return out.String()
 }

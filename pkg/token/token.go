@@ -92,6 +92,9 @@ const (
 	// RBRACE represents the right brace operator.
 	RBRACE TokenType = "}"
 
+	// COLON represents the operator which separates values in a map.
+	COLON TokenType = ":"
+
 	// 	Keywords (Are reserved for the language and cannot be used as identifiers)
 
 	// FUNCTION represents the keyword function.

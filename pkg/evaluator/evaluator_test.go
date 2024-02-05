@@ -361,6 +361,18 @@ func TestBuiltinFunctions(t *testing.T) {
 		{`len("hello world")`, 11},
 		{`len(1);`, "argument to len not supported, got: INTEGER"},
 		{`len("one", "two")`, "wrong number of arguments. got: 2 want: 1"},
+		{`len([1, 2, 3]);`, 3},
+		{`len([]);`, 0},
+		{`first([1, 2, 3])`, 1},
+		{`first(1)`, "argument to first must be an array, got: INTEGER"},
+		{`first([])`, nil},
+		{`last([1, 2, 3])`, 3},
+		{`last([])`, nil},
+		{`last(1)`, "argument to last must be an array, got: INTEGER"},
+		{`rest([1, 2, 3])`, []int{2, 3}},
+		{`rest([])`, nil},
+		{`push([], 1)`, []int{1}},
+		{`push(1, 1)`, "argument to push must be an array, got: INTEGER"},
 	}
 
 	for _, tt := range tests {
@@ -378,6 +390,22 @@ func TestBuiltinFunctions(t *testing.T) {
 			}
 			if errorObject.Message != expected {
 				t.Errorf("errorObject.Message is not %s, got %s", expected, errorObject.Message)
+			}
+
+		case []int:
+			array, ok := evaluated.(*object.Array)
+			if !ok {
+				t.Fatalf("evaluated is not *object.Array, got: %T(%+v)", evaluated, evaluated)
+				continue
+			}
+
+			if len(array.Elements) != len(expected) {
+				t.Fatalf("len(array.Elements) is not %d, got: %d", len(expected), len(array.Elements))
+				continue
+			}
+
+			for i, element := range array.Elements {
+				testIntegerObject(t, element, int64(expected[i]))
 			}
 
 		default:

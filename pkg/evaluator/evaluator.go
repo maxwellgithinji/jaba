@@ -99,6 +99,18 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		}
 		return &object.Array{Elements: elements}
 
+	case *ast.IndexExpression:
+		left := Eval(node.Left, env)
+		if isError(left) {
+			return left
+		}
+
+		index := Eval(node.Index, env)
+		if isError(index) {
+			return index
+		}
+		return evalIndexExpression(left, index)
+
 	// Identifier
 	case *ast.Identifier:
 		return evalIdentifier(node, env)
@@ -381,4 +393,30 @@ func evalStringInfixExpression(operator string, left, right object.Object) objec
 	rightValue := right.(*object.String).Value
 
 	return &object.String{Value: leftValue + rightValue}
+}
+
+// evalIndexExpression evaluates indices for a given expression
+func evalIndexExpression(left, index object.Object) object.Object {
+	switch {
+	case left.Type() == object.ARRAY_OBJECT && index.Type() == object.INTEGER_OBJECT:
+
+		return evalArrayIndexExpression(left, index)
+
+	default:
+		return newError("index operator not supported: %s", left.Type())
+	}
+}
+
+// evalArrayIndexExpression evaluates indices for an array expression
+// if we try to access an array out of range in jaba, we return NULL
+func evalArrayIndexExpression(array, index object.Object) object.Object {
+	arrayObject := array.(*object.Array)
+	indexValue := index.(*object.Integer).Value
+	max := int64(len(arrayObject.Elements) - 1)
+
+	if indexValue < 0 || indexValue > max {
+		return NULL
+	}
+
+	return arrayObject.Elements[indexValue]
 }

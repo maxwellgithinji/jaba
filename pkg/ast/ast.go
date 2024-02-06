@@ -571,3 +571,40 @@ func (i *IndexExpression) String() string {
 
 	return out.String()
 }
+
+// HashLiteral returns a map representation which can support any value including functions as keys and values
+// It fulfils the Expression interface by implementing expressionNode() method
+// It by extension fulfills the Node interface which is part of the Expression interface
+// by implementing TokenLiteral() and String() methods from the Node interface
+type HashLiteral struct {
+	// Token represents the { token
+	Token token.Token
+
+	// Pairs represents the pairs of the hash literal which are both expressions
+	Pairs map[Expression]Expression
+}
+
+// expressionNode method constructs an expression node in the Abstract Syntax Tree (AST) from the hash literal
+func (h *HashLiteral) expressionNode() {}
+
+// TokenLiteral returns the actual value of the hash literal
+func (h *HashLiteral) TokenLiteral() string {
+	return h.Token.Literal
+}
+
+// String returns a string representation of a HashLiteral node
+func (h *HashLiteral) String() string {
+	var out bytes.Buffer
+
+	pairs := []string{}
+
+	for key, value := range h.Pairs {
+		pairs = append(pairs, key.String()+":"+value.String())
+	}
+
+	out.WriteString("{")
+	out.WriteString(strings.Join(pairs, ", "))
+	out.WriteString("}")
+
+	return out.String()
+}

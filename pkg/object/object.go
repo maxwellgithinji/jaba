@@ -8,6 +8,7 @@ package object
 import (
 	"bytes"
 	"fmt"
+	"hash/fnv"
 	"strings"
 
 	"github.com/maxwellgithinji/jaba/pkg/ast"
@@ -26,6 +27,7 @@ const (
 	STRING_OBJECT       = "STRING"
 	BUILTIN_OBJECT      = "BUILTIN"
 	ARRAY_OBJECT        = "ARRAY"
+	HASH_OBJECT         = "HASH"
 )
 
 // Object is an interface that helps represent the values encountered when evaluating the jaba program
@@ -217,4 +219,76 @@ func (a *Array) Inspect() string {
 	out.WriteString("]")
 
 	return out.String()
+}
+
+// HashKey represents a a comparison object used in hashing jaba maps(hashes)
+type HashKey struct {
+	// Type returns the type of the key (string, boolean, integer, ...)
+	Type ObjectType
+
+	// Value is hash used to represent the key
+	Value uint64
+}
+
+// HashKey implements boolean hash function
+func (h *Boolean) HashKey() HashKey {
+	var value uint64
+
+	if h.Value {
+		value = 1
+	} else {
+		value = 0
+	}
+
+	return HashKey{Type: h.Type(), Value: value}
+}
+
+// HashKey implements integer hash function
+func (i *Integer) HashKey() HashKey {
+	return HashKey{Type: i.Type(), Value: uint64(i.Value)}
+}
+
+// HashKey implements string hash function
+func (s *String) HashKey() HashKey {
+	h := fnv.New64a()
+	h.Write([]byte(s.Value))
+	return HashKey{Type: s.Type(), Value: h.Sum64()}
+}
+
+// HashPair represents the key and value pairs used in jaba hash
+type HashPair struct {
+	Key   Object
+	Value Object
+}
+
+// Hash represents a jaba hash
+// it fulfills the Object interface by implementing the Type() and Inspect() methods
+type Hash struct {
+	Pairs map[HashKey]HashPair
+}
+
+// Type returns the type of the object, hash pair
+func (p *Hash) Type() ObjectType {
+	return HASH_OBJECT
+}
+
+// Inspect returns the string representation of the object value, hash pair
+func (p *Hash) Inspect() string {
+	var out bytes.Buffer
+
+	pairs := []string{}
+	for _, pair := range p.Pairs {
+		pairs = append(pairs, fmt.Sprintf("%s: %s", pair.Key.Inspect(), pair.Value.Inspect()))
+	}
+
+	out.WriteString("{")
+	out.WriteString(strings.Join(pairs, ", "))
+	out.WriteString("}")
+
+	return out.String()
+}
+
+// Hashable is an interface that can be used to evaluate if an object can be used as a hash key
+type Hashable interface {
+	HashKey() HashKey
 }

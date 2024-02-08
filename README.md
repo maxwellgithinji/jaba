@@ -21,8 +21,8 @@ Tokens themselves are small, easily categorizable data structures that are then 
 ## Getting Started
 
 ### installing
-1. clone the repository
-2. run `go run main.go`
+1. Clone the repository
+2. Run `go run main.go`
 3. Enter the jaba program on the command line
 
 
@@ -115,7 +115,7 @@ An example of a garbage collector implementation is [Mark and Sweep](https://www
 
 ## Upcoming feature
 1. Evolve the REPL to launch as a cmd application
-2. Support reading of `.jaba` files for good programming execution
+2. Support reading of `.jaba` files for good programming experience
 2. support syntax highlighting
 4. Language documentation
 

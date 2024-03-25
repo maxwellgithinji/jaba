@@ -23,7 +23,7 @@ Tokens themselves are small, easily categorizable data structures that are then 
 ### installing
 1. Clone the repository
 2. Run `go run main.go`
-3. Enter the jaba program on the command line
+3. Enter the jaba program on the command line `puts("Hello World")`
 
 
 ## Examples 
